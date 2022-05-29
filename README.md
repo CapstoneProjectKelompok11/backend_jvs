@@ -2,6 +2,8 @@
 
 ## Deployment
 
+[Temporary Controller](http://ec2-18-206-213-94.compute-1.amazonaws.com/api/test)
+
 ## Tips
 
 ### JANGAN LUPA GANTI BRANCH
