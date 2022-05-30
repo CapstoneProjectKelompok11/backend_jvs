@@ -2,11 +2,13 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.config.security.JwtTokenProvider;
 import com.capstone.booking.constant.AppConstant;
+import com.capstone.booking.domain.dao.Role;
 import com.capstone.booking.domain.dao.User;
 import com.capstone.booking.domain.dto.user.RegisterRequest;
 import com.capstone.booking.domain.dto.user.RegisterResponse;
 import com.capstone.booking.domain.payload.EmailPassword;
 import com.capstone.booking.domain.payload.TokenResponse;
+import com.capstone.booking.repository.RoleRepository;
 import com.capstone.booking.repository.UserRepository;
 import com.capstone.booking.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +24,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class AuthService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -44,9 +51,8 @@ public class AuthService {
 
     public ResponseEntity<Object> register(RegisterRequest req) {
         log.info("Executing register new user");
-        Optional<User> userOptional = userRepository.findUserByEmail(req.getEmail());
 
-        if (userOptional.isPresent()) {
+        if (userRepository.existsByEmail(req.getEmail())) {
             log.info("User with email : [{}] already exist, aborting register", req.getEmail());
             return ResponseUtil.build(
                     AppConstant.ResponseCode.BAD_CREDENTIALS,
@@ -54,12 +60,30 @@ public class AuthService {
                     HttpStatus.BAD_REQUEST
             );
         }
-
         log.info("User doesnt exist yet, creating new user");
         User user = modelMapper.map(req, User.class);
         user.setPassword(passwordEncoder.encode(req.getPassword()));
+        Set<Role> roles = new HashSet<>();
+
+        // Temporary code to insert values to Role table, comment on production
+        Optional<Role> roleOptional = roleRepository.findByName(AppConstant.RoleType.ROLE_USER);
+        if(roleOptional.isEmpty()){
+            Role userRole = new Role();
+            userRole.setName(AppConstant.RoleType.ROLE_USER);
+
+            Role adminRole = new Role();
+            adminRole.setName(AppConstant.RoleType.ROLE_ADMIN);
+
+            roleRepository.save(userRole);
+            roleRepository.save(adminRole);
+        }
+        // end of temporary code
+
+        roleRepository.findByName(AppConstant.RoleType.ROLE_USER).ifPresent(roles::add);
+
+        log.info("Roles : {}",roles.toString());
+        user.setRoles(roles);
         userRepository.save(user);
-        log.info("User doesnt exist yet, creating new user");
         return ResponseUtil.build(
                 AppConstant.ResponseCode.SUCCESS,
                 modelMapper.map(user, RegisterResponse.class),
