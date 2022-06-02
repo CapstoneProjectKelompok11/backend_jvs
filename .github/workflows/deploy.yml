@@ -74,7 +74,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            docker stop capstone
+            docker stop capstone-project
             docker rmi felz28/capstone-project:latest
             docker pull felz28/capstone-project:latest
             docker run -d --rm --name capstone-project -p 80:8080 --env-file dev.env --network capstone felz28/capstone-project:latest
