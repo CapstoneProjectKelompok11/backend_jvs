@@ -43,6 +43,8 @@ public class Building extends BaseDAO {
     @OneToMany(mappedBy = "building")
     private List<Floor> floors;
 
+    @OneToMany(mappedBy = "building")
+    private List<BuildingImage> images;
 
-    //List of building image with Element Collection
+
 }

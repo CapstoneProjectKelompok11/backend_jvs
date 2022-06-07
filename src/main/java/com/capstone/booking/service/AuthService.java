@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -67,17 +68,17 @@ public class AuthService {
         Set<Role> roles = new HashSet<>();
 
         // Temporary code to insert values to Role table, comment on production
-        Optional<Role> roleOptional = roleRepository.findByName(AppConstant.RoleType.ROLE_USER);
-        if(roleOptional.isEmpty()){
-            Role userRole = new Role();
-            userRole.setName(AppConstant.RoleType.ROLE_USER);
-
-            Role adminRole = new Role();
-            adminRole.setName(AppConstant.RoleType.ROLE_ADMIN);
-
-            roleRepository.save(userRole);
-            roleRepository.save(adminRole);
-        }
+//        Optional<Role> roleOptional = roleRepository.findByName(AppConstant.RoleType.ROLE_USER);
+//        if(roleOptional.isEmpty()){
+//            Role userRole = new Role();
+//            userRole.setName(AppConstant.RoleType.ROLE_USER);
+//
+//            Role adminRole = new Role();
+//            adminRole.setName(AppConstant.RoleType.ROLE_ADMIN);
+//
+//            roleRepository.save(userRole);
+//            roleRepository.save(adminRole);
+//        }
         // end of temporary code
 
         roleRepository.findByName(AppConstant.RoleType.ROLE_USER).ifPresent(roles::add);
@@ -104,7 +105,7 @@ public class AuthService {
             String jwt = jwtTokenProvider.generateToken(authentication);
             TokenResponse tokenResponse = new TokenResponse();
             Set<String> roles = SecurityContextHolder.getContext().getAuthentication()
-                    .getAuthorities().stream().map(r -> r.getAuthority()).collect(Collectors.toSet());
+                    .getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
             tokenResponse.setRoles(roles);
             tokenResponse.setToken(jwt);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, tokenResponse, HttpStatus.OK);

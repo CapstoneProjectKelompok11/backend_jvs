@@ -1,6 +1,7 @@
 package com.capstone.booking.domain.dto;
 
 import com.capstone.booking.domain.dao.BuildingImage;
+import com.capstone.booking.domain.dao.FloorImage;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -15,24 +16,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BuildingRequest {
-
-    @Schema(hidden = true)
+public class FloorRequest {
     private Long id;
 
-    @Schema(type = "String", example = "Equity Tower", description = "Nama Bangunan")
     private String name;
 
-    @Schema(type = "String", example = "SCBD Lot 9 Jl. Jenderal Sudirman Kav. 52-53, RT.5/RW.3, Senayan",
-            description = "Alamat Bangunan")
-    private String address;
+    private String type;
 
-    @Schema(type = "String", description = "Deskripsi Bangunan")
+    private String size;
+
+    private int maxCapacity;
+
     private String description;
 
     @Schema(hidden = true)
-    private List<BuildingImage> images;
+    private List<FloorImage> images;
 
-    @Schema(hidden = true)
-    private ComplexRequest complex;
 }

@@ -56,9 +56,9 @@ public class CityService {
             City city = modelMapper.map(req, City.class);
             cityRepository.save(city);
             log.info("Successfully added new city");
-            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, req, HttpStatus.OK);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, modelMapper.map(city, CityRequest.class), HttpStatus.OK);
         } catch (Exception e) {
-            log.error("An error occurred while trying to add new location. Error : {}", e.getMessage());
+            log.error("An error occurred while trying to add new city. Error : {}", e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

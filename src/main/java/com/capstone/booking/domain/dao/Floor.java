@@ -10,6 +10,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -39,7 +40,10 @@ public class Floor extends BaseDAO {
     @JoinColumn(name = "building_id")
     private Building building;
 
+    @OneToMany(mappedBy = "floor")
+    private List<FloorImage> images;
+
+
     //List of floor facility with Element Collection
 
-    //List of floor image with Element Collection
 }

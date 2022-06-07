@@ -54,13 +54,13 @@ public class ComplexService {
         }
     }
 
-    public ResponseEntity<Object> addNewCity(ComplexRequest req, Long cityId) {
+    public ResponseEntity<Object> addNewComplex(ComplexRequest req, Long cityId) {
         log.info("Executing add new City");
         try {
             //Checking city exist or not on database
             Optional<City> city = cityRepository.findById(cityId);
             if(city.isEmpty()) {
-                log.info("Complex with ID [{}] not found ", req.getCity().getId());
+                log.info("City with ID [{}] not found ", cityId);
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
                         null,
                         HttpStatus.BAD_REQUEST);
