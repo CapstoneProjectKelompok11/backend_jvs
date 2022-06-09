@@ -10,7 +10,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -26,22 +25,26 @@ public class Floor extends BaseDAO {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
     private String size;
 
+    @Column(nullable = false)
     private int maxCapacity;
 
-    private String description;
+    @Column(nullable = false)
+    private int startingPrice;
 
     @ManyToOne
     @JoinColumn(name = "building_id")
     private Building building;
 
-    @OneToMany(mappedBy = "floor")
-    private List<FloorImage> images;
+    private String image;
 
 
     //List of floor facility with Element Collection

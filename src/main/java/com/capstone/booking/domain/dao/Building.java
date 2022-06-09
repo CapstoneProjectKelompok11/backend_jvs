@@ -35,6 +35,12 @@ public class Building extends BaseDAO {
 
     private String description;
 
+    private int floorCount;
+
+    private int capacity;
+
+    private String buildingSize;
+
     @ManyToOne
     @JoinColumn(name = "complex_id")
     private Complex complex;

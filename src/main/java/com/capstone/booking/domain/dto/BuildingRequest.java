@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -29,6 +30,21 @@ public class BuildingRequest {
 
     @Schema(type = "String", description = "Deskripsi Bangunan")
     private String description;
+
+    @Schema(hidden = true)
+    private double rating;
+
+    @Schema(hidden = true)
+    private Set<String> officeType;
+
+    @Schema(type = "String", example = "290 x 290 m2")
+    private String buildingSize;
+
+    @Schema(type = "int", example = "8")
+    private int floorCount;
+
+    @Schema(type = "int", example = "30")
+    private int capacity;
 
     @Schema(hidden = true)
     private List<BuildingImage> images;

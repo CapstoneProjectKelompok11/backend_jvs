@@ -31,6 +31,7 @@ public class SecurityConfiguration {
         http.cors().and().csrf().disable();
         http.headers().frameOptions().disable();
         http.authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/auth/**").hasRole("USER")
                 .antMatchers("/api/**").permitAll();
 
         //remove session

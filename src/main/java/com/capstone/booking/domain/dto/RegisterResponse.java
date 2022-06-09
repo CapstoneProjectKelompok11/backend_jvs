@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterResponse {
+
+    private Long id;
+
     private String firstName;
 
     private String lastName;

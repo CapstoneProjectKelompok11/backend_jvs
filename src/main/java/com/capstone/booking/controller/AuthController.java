@@ -28,9 +28,4 @@ public class AuthController {
         return authService.generateToken(req);
     }
 
-    @GetMapping("/admin/test")
-    public ResponseEntity<Object> adminTest() {
-        return ResponseEntity.ok("test successfull");
-    }
-
 }

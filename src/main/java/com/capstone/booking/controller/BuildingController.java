@@ -2,10 +2,6 @@ package com.capstone.booking.controller;
 
 import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.service.BuildingService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Encoding;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -24,8 +20,9 @@ public class BuildingController {
     private BuildingService buildingService;
 
     @GetMapping("/building")
-    public ResponseEntity<Object> getAllBuilding() {
-        return buildingService.getAllBuilding();
+    public ResponseEntity<Object> getAllBuilding(@RequestParam ("page") int page,
+                                                 @RequestParam ("limit") int limit) {
+        return buildingService.getBuilding(page, limit);
     }
 
     @PostMapping(value = "/admin/building")
@@ -40,9 +37,10 @@ public class BuildingController {
         return buildingService.addImage(buildingId, file);
     }
 
-    @GetMapping("/building/image/{filename}")
-    public ResponseEntity<Object> getImage(@PathVariable String filename) {
-        log.info(filename);
+    @GetMapping(value = "/building/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<Object> getImage(@PathVariable String filename) throws IOException {
         return buildingService.getImage(filename);
     }
+
+
 }

@@ -11,6 +11,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -42,8 +43,12 @@ public class Review extends BaseDAO {
     @JoinColumn(name = "building_id")
     private Building building;
 
+
     private String review;
 
+    @Column(nullable = false)
     private int rating;
+
+    private LocalDateTime reviewDate;
 
 }

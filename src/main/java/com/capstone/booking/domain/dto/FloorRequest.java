@@ -1,7 +1,5 @@
 package com.capstone.booking.domain.dto;
 
-import com.capstone.booking.domain.dao.BuildingImage;
-import com.capstone.booking.domain.dao.FloorImage;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -9,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 @Data
 @Builder
@@ -17,19 +14,25 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FloorRequest {
+    @Schema(hidden = true)
     private Long id;
 
+    @Schema(type = "String", example = "Floor 48th")
     private String name;
 
+    @Schema(type = "String", example = "Serviced Office")
     private String type;
 
-    private String size;
+    @Schema(type = "String", example = "320.20 sqm")
+    private String floorSize;
 
+    @Schema(type = "int", example = "8")
     private int maxCapacity;
 
-    private String description;
+    @Schema(type = "int", example = "23000000")
+    private int startingPrice;
 
     @Schema(hidden = true)
-    private List<FloorImage> images;
+    private String image;
 
 }

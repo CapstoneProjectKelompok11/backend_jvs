@@ -2,9 +2,7 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.City;
-import com.capstone.booking.domain.dao.Complex;
 import com.capstone.booking.domain.dto.CityRequest;
-import com.capstone.booking.domain.dto.ComplexRequest;
 import com.capstone.booking.repository.CityRepository;
 import com.capstone.booking.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
