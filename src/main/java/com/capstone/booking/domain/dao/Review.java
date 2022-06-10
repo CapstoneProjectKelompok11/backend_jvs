@@ -43,7 +43,7 @@ public class Review extends BaseDAO {
     @JoinColumn(name = "building_id")
     private Building building;
 
-
+    @Column(columnDefinition = "text")
     private String review;
 
     @Column(nullable = false)

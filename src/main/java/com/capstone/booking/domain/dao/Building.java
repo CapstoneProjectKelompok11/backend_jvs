@@ -33,6 +33,7 @@ public class Building extends BaseDAO {
     @Column(nullable = false)
     private String address;
 
+    @Column(columnDefinition = "text")
     private String description;
 
     private int floorCount;
