@@ -4,8 +4,8 @@ import com.capstone.booking.config.security.JwtTokenProvider;
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.Role;
 import com.capstone.booking.domain.dao.User;
-import com.capstone.booking.domain.dto.user.RegisterRequest;
-import com.capstone.booking.domain.dto.user.RegisterResponse;
+import com.capstone.booking.domain.dto.RegisterRequest;
+import com.capstone.booking.domain.dto.RegisterResponse;
 import com.capstone.booking.domain.payload.EmailPassword;
 import com.capstone.booking.domain.payload.TokenResponse;
 import com.capstone.booking.repository.RoleRepository;
@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -102,8 +104,10 @@ public class AuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtTokenProvider.generateToken(authentication);
             TokenResponse tokenResponse = new TokenResponse();
+            Set<String> roles = SecurityContextHolder.getContext().getAuthentication()
+                    .getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
+            tokenResponse.setRoles(roles);
             tokenResponse.setToken(jwt);
-
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, tokenResponse, HttpStatus.OK);
         } catch (BadCredentialsException e) {
             log.error("Bad Credential", e);

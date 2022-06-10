@@ -77,5 +77,5 @@ jobs:
             docker stop capstone-project
             docker rmi felz28/capstone-project:latest
             docker pull felz28/capstone-project:latest
-            docker run -d --rm --name capstone-project -p 80:8080 --env-file dev.env --network capstone felz28/capstone-project:latest
+            docker run -d --rm --name capstone-project -p 80:8080 -v "/home/ec2-user/images/":/app/images/ --env-file dev.env --network capstone felz28/capstone-project:latest
 

@@ -1,5 +1,6 @@
 package com.capstone.booking.constant;
 
+
 public class AppConstant {
 
     private AppConstant() {}
