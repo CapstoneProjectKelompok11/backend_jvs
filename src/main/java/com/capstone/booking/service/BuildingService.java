@@ -52,11 +52,18 @@ public class BuildingService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseEntity<Object> getBuilding(int page, int limit) {
+    public ResponseEntity<Object> getBuilding(Long complexId, int page, int limit) {
         log.info("Executing get all Building");
         try {
             Pageable pageable = PageRequest.of(page, limit);
-            Page<Building> buildingList = buildingRepository.findAll(pageable);
+            Page<Building> buildingList;
+            if(complexId == null) {
+                log.info("Complex Id is null. Getting all building");
+                buildingList = buildingRepository.findAll(pageable);
+            } else {
+                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
+                buildingList = buildingRepository.findAllByComplex_Id(complexId, pageable);
+            }
             List<BuildingRequest> buildingRequests = new ArrayList<>();
             for (Building building :
                     buildingList) {
@@ -151,4 +158,6 @@ public class BuildingService {
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }

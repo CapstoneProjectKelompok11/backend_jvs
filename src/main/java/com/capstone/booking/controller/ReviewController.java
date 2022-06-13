@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 
 @RestController
 @CrossOrigin
@@ -22,11 +24,11 @@ public class ReviewController {
         return reviewService.getReviewByBuildingId(buildingId, page, limit);
     }
 
-    @PostMapping("/review")
+    @PostMapping("/auth/review")
     public ResponseEntity<Object> addReview (@RequestBody ReviewRequest request,
                                              @RequestParam ("BuildingID") Long buildingId,
-                                             @RequestParam ("UserID") Long userId) {
-        return reviewService.addReview(request, userId, buildingId);
+                                             Principal principal) {
+        return reviewService.addReview(request, principal, buildingId);
     }
 
 }

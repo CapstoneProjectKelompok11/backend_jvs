@@ -18,8 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,20 +70,20 @@ public class ReviewService {
         }
     }
 
-    public ResponseEntity<Object> addReview (ReviewRequest req, Long userId, Long buildingId) {
+    public ResponseEntity<Object> addReview (ReviewRequest req, Principal principal, Long buildingId) {
         log.info("Executing add new review");
         try{
-            Optional<Building> optionalBuilding = buildingRepository.findById(buildingId);
-            if(optionalBuilding.isEmpty()) {
-                log.info("Building with ID [{}] not found ", buildingId);
+            Optional<User> optionalUser = userRepository.findUserByEmail(principal.getName());
+            if(optionalUser.isEmpty()) {
+                log.info("User with Email [{}] not found ", principal.getName());
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
                         null,
                         HttpStatus.BAD_REQUEST);
             }
 
-            Optional<User> optionalUser = userRepository.findById(userId);
-            if(optionalUser.isEmpty()) {
-                log.info("User with ID [{}] not found ", userId);
+            Optional<Building> optionalBuilding = buildingRepository.findById(buildingId);
+            if(optionalBuilding.isEmpty()) {
+                log.info("Building with ID [{}] not found ", buildingId);
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
                         null,
                         HttpStatus.BAD_REQUEST);
@@ -98,8 +100,8 @@ public class ReviewService {
                     HttpStatus.OK);
 
         } catch (Exception e) {
-            log.error("Error occured while trying to add review from User with ID {} to Building with ID {}. Error : {} ",
-                    userId, buildingId, e.getMessage());
+            log.error("Error occured while trying to add review from User {} to Building with ID {}. Error : {} ",
+                    principal.getName(), buildingId, e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

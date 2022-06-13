@@ -20,9 +20,10 @@ public class BuildingController {
     private BuildingService buildingService;
 
     @GetMapping("/building")
-    public ResponseEntity<Object> getAllBuilding(@RequestParam ("page") int page,
+    public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "ComplexId", required = false) Long complexId,
+                                                 @RequestParam ("page") int page,
                                                  @RequestParam ("limit") int limit) {
-        return buildingService.getBuilding(page, limit);
+        return buildingService.getBuilding(complexId, page, limit);
     }
 
     @PostMapping(value = "/admin/building")
