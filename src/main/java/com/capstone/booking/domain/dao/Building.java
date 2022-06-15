@@ -36,8 +36,6 @@ public class Building extends BaseDAO {
     @Column(columnDefinition = "text")
     private String description;
 
-    private int floorCount;
-
     private int capacity;
 
     private String buildingSize;

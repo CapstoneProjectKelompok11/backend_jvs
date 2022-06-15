@@ -4,6 +4,8 @@
 
 [API Documentation](http://ec2-18-206-213-94.compute-1.amazonaws.com/api/swagger-ui/index.html)
 
+[Code Coverage](http://ec2-18-206-213-94.compute-1.amazonaws.com:8000/api/swagger-ui/index.html)
+
 ## Tips
 
 ### JANGAN LUPA GANTI BRANCH
