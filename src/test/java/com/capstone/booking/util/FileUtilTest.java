@@ -31,18 +31,6 @@ class FileUtilTest {
         assertTrue(del);
     }
 
-    @Test
-    void upload_Error_Test() throws IOException {
-        MockMultipartFile file = new MockMultipartFile(
-                "name",
-                "some_original_filename",
-                MediaType.IMAGE_PNG_VALUE,
-                "think of this as image".getBytes());
-
-        assertThrows(Exception.class, () -> {
-            String result = FileUtil.upload("Z:\\some_path_that\\didnt_exist\\", file);
-        });
-    }
 
     @Test
     void delete_Error_Test() throws IOException {
@@ -55,11 +43,4 @@ class FileUtilTest {
 
     }
 
-    @Test
-    void download() {
-    }
-
-    @Test
-    void getFileContent() {
-    }
 }
