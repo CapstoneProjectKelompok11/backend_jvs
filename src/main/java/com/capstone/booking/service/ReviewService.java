@@ -70,12 +70,12 @@ public class ReviewService {
         }
     }
 
-    public ResponseEntity<Object> addReview (ReviewRequest req, Principal principal, Long buildingId) {
+    public ResponseEntity<Object> addReview (ReviewRequest req, String email, Long buildingId) {
         log.info("Executing add new review");
         try{
-            Optional<User> optionalUser = userRepository.findUserByEmail(principal.getName());
+            Optional<User> optionalUser = userRepository.findUserByEmail(email);
             if(optionalUser.isEmpty()) {
-                log.info("User with Email [{}] not found ", principal.getName());
+                log.info("User with Email [{}] not found ", email);
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
                         null,
                         HttpStatus.BAD_REQUEST);
@@ -101,7 +101,7 @@ public class ReviewService {
 
         } catch (Exception e) {
             log.error("Error occured while trying to add review from User {} to Building with ID {}. Error : {} ",
-                    principal.getName(), buildingId, e.getMessage());
+                    email, buildingId, e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

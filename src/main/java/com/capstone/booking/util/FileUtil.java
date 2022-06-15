@@ -2,8 +2,8 @@ package com.capstone.booking.util;
 
 import com.capstone.booking.constant.AppConstant;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.coyote.Response;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -44,19 +43,18 @@ public class FileUtil {
         }
     }
 
-    public static ResponseEntity<Object> download(String path, String filename) {
-        log.info("Sending File with name : {}", filename);
-        Path filePath = Paths.get(path + filename);
-        Resource resource = null;
-        try {
-            resource = new UrlResource(filePath.toUri());
-        } catch (Exception e) {
-            log.error("Error occurred while trying to create resource URL. Error : {}", e.getMessage());
+    public static ResponseEntity<Object> getFileContent(String path, String filename) {
+        try{
+            File file = new File(path + filename);
+            log.info("Getting file data with file name \"{}\" ", file.getAbsolutePath());
+            byte[] imageByte = FileUtils.readFileToByteArray(file);
+            return ResponseEntity.ok().body(imageByte);
+        } catch (FileNotFoundException e) {
+            log.error("File with name \"{}\" not found", filename);
             return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.info("Error occurred while trying to get data with filename {}. Error : {}", filename, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
     }
 }

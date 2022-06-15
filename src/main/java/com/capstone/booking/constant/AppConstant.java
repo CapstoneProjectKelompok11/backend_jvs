@@ -5,12 +5,16 @@ public class AppConstant {
 
     private AppConstant() {}
 
-    public static final String DEFAULT_SYSTEM = "SYSTEM";
+    public static final String DATE_JSON_FORMAT = "dd-MM-yyyy";
+
+    public static final String DATETIME_JSON_FORMAT = "dd-MM-yyyy HH:mm:ss";
     public enum ResponseCode {
 
         SUCCESS("SUCCESS", "Success!"),
         DATA_NOT_FOUND("DATA_NOT_FOUND", "Data not found!"),
         UNKNOWN_ERROR("UNKNOWN_ERROR", "Happened unknown error!"),
+
+        NOT_LOGGED_IN("NOT_LOGGED_IN", "Login first to access this endpoint"),
         BAD_CREDENTIALS("BAD_CREDENTIALS", "Provided Credentials is wrong!");
 
         private final String code;

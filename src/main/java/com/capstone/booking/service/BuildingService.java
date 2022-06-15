@@ -116,7 +116,7 @@ public class BuildingService {
 
     public ResponseEntity<Object> addImage(Long buildingId, MultipartFile image) throws IOException {
         log.info("Executing add image to building with ID : {}", buildingId);
-//        //Checking building exist or not on database
+        //Checking building exist or not on database
         try {
             Optional<Building> building = buildingRepository.findById(buildingId);
             if (building.isEmpty()) {
@@ -144,19 +144,8 @@ public class BuildingService {
         }
     }
 
-    public ResponseEntity<Object> getImage(String filename) throws IOException {
-        File file = new File(path + filename);
-        log.info("Getting building image with file name \"{}\" ", file.getAbsolutePath());
-        try{
-            byte[] imageByte = FileUtils.readFileToByteArray(file);
-            return ResponseEntity.ok().body(imageByte);
-        } catch (FileNotFoundException e) {
-            log.error("Image file with name \"{}\" not found", filename);
-            return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            log.info("Error occurred while trying to get image data with filename {}. Error : {}", filename, e.getMessage());
-            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<Object> getImage(String filename) {
+        return FileUtil.getFileContent(path, filename);
     }
 
 

@@ -1,5 +1,6 @@
 package com.capstone.booking.domain.dto;
 
+import com.capstone.booking.constant.AppConstant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,7 +27,7 @@ public class ReviewRequest {
     @Schema(type = "int", example = "5")
     private int rating;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATE_JSON_FORMAT)
     @Schema(hidden = true)
     private LocalDateTime reviewDate;
 
