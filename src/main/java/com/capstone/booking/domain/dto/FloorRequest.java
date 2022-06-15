@@ -1,17 +1,23 @@
 package com.capstone.booking.domain.dto;
 
+import com.capstone.booking.constant.AppConstant;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FloorRequest {
     @Schema(hidden = true)
@@ -29,10 +35,12 @@ public class FloorRequest {
     @Schema(type = "int", example = "8")
     private int maxCapacity;
 
-    @Schema(type = "int", example = "23000000")
+    @Schema(type = "int", example = "2300000")
     private int startingPrice;
 
     @Schema(hidden = true)
     private String image;
 
+    @Schema(type = "Set<FacilityType>")
+    private Set<AppConstant.FacilityType> facilities;
 }

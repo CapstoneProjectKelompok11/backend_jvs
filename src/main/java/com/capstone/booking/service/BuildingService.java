@@ -52,19 +52,28 @@ public class BuildingService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseEntity<Object> getBuilding(int page, int limit) {
+    public ResponseEntity<Object> getBuilding(Long complexId, int page, int limit) {
         log.info("Executing get all Building");
         try {
             Pageable pageable = PageRequest.of(page, limit);
-            Page<Building> buildingList = buildingRepository.findAll(pageable);
+            Page<Building> buildingList;
+            if(complexId == null) {
+                log.info("Complex Id is null. Getting all building");
+                buildingList = buildingRepository.findAll(pageable);
+            } else {
+                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
+                buildingList = buildingRepository.findAllByComplex_Id(complexId, pageable);
+            }
             List<BuildingRequest> buildingRequests = new ArrayList<>();
             for (Building building :
                     buildingList) {
                 Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(building.getId());
                 Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
                 BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
                 request.setOfficeType(types);
                 request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
                 buildingRequests.add(request);
             }
 
@@ -109,7 +118,7 @@ public class BuildingService {
 
     public ResponseEntity<Object> addImage(Long buildingId, MultipartFile image) throws IOException {
         log.info("Executing add image to building with ID : {}", buildingId);
-//        //Checking building exist or not on database
+        //Checking building exist or not on database
         try {
             Optional<Building> building = buildingRepository.findById(buildingId);
             if (building.isEmpty()) {
@@ -137,18 +146,9 @@ public class BuildingService {
         }
     }
 
-    public ResponseEntity<Object> getImage(String filename) throws IOException {
-        File file = new File(path + filename);
-        log.info("Getting building image with file name \"{}\" ", file.getAbsolutePath());
-        try{
-            byte[] imageByte = FileUtils.readFileToByteArray(file);
-            return ResponseEntity.ok().body(imageByte);
-        } catch (FileNotFoundException e) {
-            log.error("Image file with name \"{}\" not found", filename);
-            return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            log.info("Error occurred while trying to get image data with filename {}. Error : {}", filename, e.getMessage());
-            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<Object> getImage(String filename) {
+        return FileUtil.getFileContent(path, filename);
     }
+
+
 }

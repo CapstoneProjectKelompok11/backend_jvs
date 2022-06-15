@@ -1,10 +1,15 @@
 package com.capstone.booking.controller;
 
+import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dto.ReviewRequest;
 import com.capstone.booking.service.ReviewService;
+import com.capstone.booking.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 
 @RestController
@@ -22,11 +27,15 @@ public class ReviewController {
         return reviewService.getReviewByBuildingId(buildingId, page, limit);
     }
 
-    @PostMapping("/review")
+    @PostMapping("/auth/review")
     public ResponseEntity<Object> addReview (@RequestBody ReviewRequest request,
                                              @RequestParam ("BuildingID") Long buildingId,
-                                             @RequestParam ("UserID") Long userId) {
-        return reviewService.addReview(request, userId, buildingId);
+                                             Principal principal) {
+        if(principal != null) {
+            return reviewService.addReview(request, principal.getName(), buildingId);
+        } else {
+            return ResponseUtil.build(AppConstant.ResponseCode.NOT_LOGGED_IN, null, HttpStatus.FORBIDDEN);
+        }
     }
 
 }

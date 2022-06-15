@@ -17,8 +17,8 @@ public class ComplexController {
 
     @GetMapping("/complex")
     @SecurityRequirements
-    public ResponseEntity<Object> getAllComplex() {
-        return complexService.getAllComplex();
+    public ResponseEntity<Object> getAllComplex(@RequestParam (value = "City", required = false) String city) {
+        return complexService.getAllComplex(city);
     }
 
     @PostMapping("/admin/complex")

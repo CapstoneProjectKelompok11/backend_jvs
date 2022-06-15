@@ -31,10 +31,17 @@ public class ComplexService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseEntity<Object> getAllComplex() {
+    public ResponseEntity<Object> getAllComplex(String city) {
         log.info("Executing get all complex");
         try {
-            List<Complex> complexList = complexRepository.findAll();
+            List<Complex> complexList;
+            if(city == null) {
+                log.info("Retrieving all complex");
+                complexList = complexRepository.findAll();
+            } else {
+                log.info("Retrieving all complex in city {}", city);
+                complexList = complexRepository.findAllByCity_Name(city);
+            }
             List<ComplexRequest> complexRequests = new ArrayList<>();
             for (Complex complex :
                     complexList) {

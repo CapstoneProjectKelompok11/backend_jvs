@@ -2,17 +2,13 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.Building;
-import com.capstone.booking.domain.dao.BuildingImage;
-import com.capstone.booking.domain.dao.Complex;
 import com.capstone.booking.domain.dao.Floor;
-import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.repository.BuildingRepository;
 import com.capstone.booking.repository.FloorRepository;
 import com.capstone.booking.util.FileUtil;
 import com.capstone.booking.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,6 +108,9 @@ public class FloorService {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
             Floor floor = floorOptional.get();
+            if(floor.getImage()!=null) {
+                FileUtil.delete(path, floor.getImage());
+            }
             floor.setImage(uploadedFile);
             floorRepository.save(floor);
             log.info("Image Successfully uploaded");
@@ -125,10 +123,7 @@ public class FloorService {
         }
     }
 
-    public ResponseEntity<Object> getImage(String filename) throws IOException {
-        File file = new File(path + filename);
-        log.info("Getting floor image with file name \"{}\" ", file.getAbsolutePath());
-        byte[] imageByte = FileUtils.readFileToByteArray(file);
-        return ResponseEntity.ok().body(imageByte);
+    public ResponseEntity<Object> getImage(String filename) {
+        return FileUtil.getFileContent(path, filename);
     }
 }

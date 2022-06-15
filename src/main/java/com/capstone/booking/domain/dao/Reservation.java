@@ -1,5 +1,6 @@
 package com.capstone.booking.domain.dao;
 
+import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.common.BaseDAO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -36,10 +37,10 @@ public class Reservation extends BaseDAO {
     @JoinColumn(name = "floor_id")
     private Floor floor;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
     private LocalDateTime startReservation;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
     private LocalDateTime endReservation;
 
     private String company;
