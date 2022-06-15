@@ -14,4 +14,6 @@ public interface FloorRepository extends JpaRepository<Floor, Long> {
 
     @Query("SELECT DISTINCT (f.type) FROM Floor f where f.building.id = ?1")
     Set<String> findDistinctTypeByBuilding_Id(Long buildingId);
+
+    int countByBuilding_Id (Long buildingId);
 }

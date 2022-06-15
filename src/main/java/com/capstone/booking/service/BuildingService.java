@@ -70,8 +70,10 @@ public class BuildingService {
                 Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(building.getId());
                 Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
                 BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
                 request.setOfficeType(types);
                 request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
                 buildingRequests.add(request);
             }
 

@@ -39,4 +39,8 @@ public class AppConstant {
         ROLE_USER,
         ROLE_ADMIN
     }
+
+    public enum FacilityType {
+        PROJECTOR, WIFI, PARKING, BANK, RESTAURANT
+    }
 }

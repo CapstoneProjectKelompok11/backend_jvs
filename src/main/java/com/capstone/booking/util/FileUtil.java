@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -40,6 +41,18 @@ public class FileUtil {
         } else {
             log.info("File with name {} already exist", filename);
             return null;
+        }
+    }
+
+    public static boolean delete(String path, String fileName) throws IOException {
+        Path filepath = Paths.get(path+fileName);
+        try {
+            Files.delete(filepath);
+            log.info("Successfully deleted file at {}", filepath);
+            return true;
+        } catch (Exception e) {
+            log.error("Error while trying to delete file. Error : {}", e.getMessage());
+            return false;
         }
     }
 

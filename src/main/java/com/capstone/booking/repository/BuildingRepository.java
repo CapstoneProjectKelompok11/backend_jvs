@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BuildingRepository extends JpaRepository<Building, Long> {
     Page<Building> findAllByComplex_Id(Long complexId, Pageable pageable);
+
+
 }

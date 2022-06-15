@@ -108,6 +108,9 @@ public class FloorService {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
             Floor floor = floorOptional.get();
+            if(floor.getImage()!=null) {
+                FileUtil.delete(path, floor.getImage());
+            }
             floor.setImage(uploadedFile);
             floorRepository.save(floor);
             log.info("Image Successfully uploaded");

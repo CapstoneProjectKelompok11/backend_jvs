@@ -82,6 +82,8 @@ class BuildingServiceTest {
 
         Double rating = 4.8;
 
+        int floorCount = 3;
+
         BuildingRequest request = BuildingRequest.builder()
                 .id(1L)
                 .name("Gedung A")
@@ -92,6 +94,7 @@ class BuildingServiceTest {
         when(buildingRepository.findAllByComplex_Id(anyLong(), any())).thenReturn(buildingPage);
         when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
         when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
 
         ResponseEntity responseEntity = buildingService.getBuilding(1L, 0,1);
@@ -105,6 +108,7 @@ class BuildingServiceTest {
         assertEquals(100, result.get(0).getCapacity());
         assertEquals(rating, result.get(0).getRating());
         assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
     }
 
     @Test
@@ -125,6 +129,8 @@ class BuildingServiceTest {
 
         Double rating = 4.8;
 
+        int floorCount = 3;
+
         BuildingRequest request = BuildingRequest.builder()
                 .id(1L)
                 .name("Gedung A")
@@ -135,6 +141,7 @@ class BuildingServiceTest {
         when(buildingRepository.findAll(any(Pageable.class))).thenReturn(buildingPage);
         when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
         when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
 
         ResponseEntity responseEntity = buildingService.getBuilding(null, 0,1);
@@ -148,6 +155,7 @@ class BuildingServiceTest {
         assertEquals(100, result.get(0).getCapacity());
         assertEquals(rating, result.get(0).getRating());
         assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
     }
 
     @Test

@@ -2,6 +2,8 @@ package com.capstone.booking.domain.dto;
 
 import com.capstone.booking.domain.dao.BuildingImage;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +17,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BuildingRequest {
 
@@ -40,7 +43,7 @@ public class BuildingRequest {
     @Schema(type = "String", example = "290 x 290 m2")
     private String buildingSize;
 
-    @Schema(type = "int", example = "8")
+    @Schema(hidden = true)
     private int floorCount;
 
     @Schema(type = "int", example = "30")
