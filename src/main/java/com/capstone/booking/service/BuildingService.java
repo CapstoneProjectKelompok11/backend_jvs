@@ -90,6 +90,39 @@ public class BuildingService {
         }
     }
 
+    public ResponseEntity<Object> getBuildingById(Long id) {
+        log.info("Executing get Building with ID : {}", id);
+        try {
+            Optional<Building> building = buildingRepository.findById(id);
+            if(building.isEmpty()) {
+                log.info("Building with ID [{}] not found ", id);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
+                        null,
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(id);
+            Double rating = reviewRepository.averageOfBuildingReviewRating(id);
+
+            BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+            int floorCount = floorRepository.countByBuilding_Id(id);
+            request.setOfficeType(types);
+            request.setRating(Objects.requireNonNullElse(rating, 0.0));
+            request.setFloorCount(floorCount);
+
+            log.info("Successfully retrieved Building with ID : {}", id);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    request,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get building with ID : {}. Error : {}", id, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<Object> addNewBuilding(BuildingRequest req, Long complexId) {
         log.info("Executing create new Building");
         try {

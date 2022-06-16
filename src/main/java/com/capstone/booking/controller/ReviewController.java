@@ -21,7 +21,7 @@ public class ReviewController {
     private ReviewService reviewService;
 
     @GetMapping("/review")
-    public ResponseEntity<Object> getReviewByBuilding (@RequestParam ("BuildingID") Long buildingId,
+    public ResponseEntity<Object> getReviewByBuilding (@RequestParam ("buildingId") Long buildingId,
                                                        @RequestParam ("page") int page ,
                                                        @RequestParam ("limit") int limit) {
         return reviewService.getReviewByBuildingId(buildingId, page, limit);
@@ -29,7 +29,7 @@ public class ReviewController {
 
     @PostMapping("/auth/review")
     public ResponseEntity<Object> addReview (@RequestBody ReviewRequest request,
-                                             @RequestParam ("BuildingID") Long buildingId,
+                                             @RequestParam ("buildingId") Long buildingId,
                                              Principal principal) {
         if(principal != null) {
             return reviewService.addReview(request, principal.getName(), buildingId);
