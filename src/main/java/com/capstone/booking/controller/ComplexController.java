@@ -17,7 +17,7 @@ public class ComplexController {
 
     @GetMapping("/complex")
     @SecurityRequirements
-    public ResponseEntity<Object> getAllComplex(@RequestParam (value = "City", required = false) String city) {
+    public ResponseEntity<Object> getAllComplex(@RequestParam (value = "city", required = false) String city) {
         return complexService.getAllComplex(city);
     }
 

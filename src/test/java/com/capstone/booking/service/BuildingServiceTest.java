@@ -28,7 +28,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +96,7 @@ class BuildingServiceTest {
         when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
 
-        ResponseEntity responseEntity = buildingService.getBuilding(1L, 0,1);
+        ResponseEntity<Object> responseEntity = buildingService.getBuilding(1L, 0,1);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
         List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
@@ -144,7 +143,7 @@ class BuildingServiceTest {
         when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
 
-        ResponseEntity responseEntity = buildingService.getBuilding(null, 0,1);
+        ResponseEntity<Object> responseEntity = buildingService.getBuilding(null, 0,1);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
         List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
@@ -164,6 +163,59 @@ class BuildingServiceTest {
         ResponseEntity<Object> responseEntity = buildingService.getBuilding(null, 0, 1);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
         assertEquals(AppConstant.ResponseCode.UNKNOWN_ERROR.getCode(), apiResponse.getStatus().getCode());
+    }
+
+    @Test
+    void getBuildingById_Success_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+
+        Double rating = 4.8;
+
+        int floorCount = 3;
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
+        when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", ((BuildingRequest) apiResponse.getData()).getName());
+    }
+
+    @Test
+    void getBuildingById_BuildingEmpty_Test() {
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void getBuildingById_Error_Test() {
+        when(buildingRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
     @Test
@@ -196,7 +248,7 @@ class BuildingServiceTest {
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
 
 
-        ResponseEntity responseEntity = buildingService.addNewBuilding(request, 1L);
+        ResponseEntity<Object> responseEntity = buildingService.addNewBuilding(request, 1L);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -220,7 +272,7 @@ class BuildingServiceTest {
         when(complexRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 
-        ResponseEntity responseEntity = buildingService.addNewBuilding(request, 1L);
+        ResponseEntity<Object> responseEntity = buildingService.addNewBuilding(request, 1L);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
@@ -345,8 +397,4 @@ class BuildingServiceTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
-    @Test
-    void getImage_Success_Test() {
-
-    }
 }
