@@ -19,27 +19,32 @@ public class BuildingController {
     @Autowired
     private BuildingService buildingService;
 
-    @GetMapping("/building")
-    public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "ComplexId", required = false) Long complexId,
+    @GetMapping("/buildings")
+    public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "complexId", required = false) Long complexId,
                                                  @RequestParam ("page") int page,
                                                  @RequestParam ("limit") int limit) {
         return buildingService.getBuilding(complexId, page, limit);
     }
 
+    @GetMapping("/building")
+    public ResponseEntity<Object> getOneBuilding(@RequestParam (value = "id") Long id) {
+        return buildingService.getBuildingById(id);
+    }
+
     @PostMapping(value = "/admin/building")
     public ResponseEntity<Object> addNewBuilding(@RequestBody BuildingRequest request,
-                                                 @RequestParam ("ComplexID") Long complexId) {
+                                                 @RequestParam ("complexId") Long complexId) {
         return buildingService.addNewBuilding(request, complexId);
     }
 
     @PostMapping(value = "/admin/building/image", consumes = "multipart/form-data")
-    public ResponseEntity<Object> addNewImage(@RequestParam ("BuildingID") Long buildingId,
+    public ResponseEntity<Object> addNewImage(@RequestParam ("buildingId") Long buildingId,
                                               @RequestPart("image") MultipartFile file) throws IOException{
         return buildingService.addImage(buildingId, file);
     }
 
     @GetMapping(value = "/building/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<Object> getImage(@PathVariable String filename) throws IOException {
+    public ResponseEntity<Object> getImage(@PathVariable String filename) {
         return buildingService.getImage(filename);
     }
 
