@@ -91,7 +91,7 @@ class BuildingServiceTest {
                 .build();
 
         when(buildingRepository.findAllByComplex_Id(anyLong(), any())).thenReturn(buildingPage);
-        when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
         when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
         when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
@@ -138,7 +138,7 @@ class BuildingServiceTest {
                 .build();
 
         when(buildingRepository.findAll(any(Pageable.class))).thenReturn(buildingPage);
-        when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
         when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
         when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
@@ -188,7 +188,7 @@ class BuildingServiceTest {
                 .build();
 
         when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
-        when(floorRepository.findDistinctTypeByBuilding_Id(anyLong())).thenReturn(type);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
         when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
         when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
         when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);

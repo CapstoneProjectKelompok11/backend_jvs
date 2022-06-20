@@ -38,14 +38,22 @@ public class Reservation extends BaseDAO {
     private Floor floor;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
+    @Column(nullable = false)
     private LocalDateTime startReservation;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
+    @Column(nullable = false)
     private LocalDateTime endReservation;
 
     private String company;
 
+    @Column(nullable = false)
     private Long price;
 
+    @Column(columnDefinition = "text")
     private String note;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppConstant.ReservationStatus status;
 }

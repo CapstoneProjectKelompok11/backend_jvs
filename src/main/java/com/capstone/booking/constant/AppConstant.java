@@ -43,4 +43,8 @@ public class AppConstant {
     public enum FacilityType {
         PROJECTOR, WIFI, PARKING, BANK, RESTAURANT
     }
+
+    public enum ReservationStatus {
+        PENDING, RESERVED, WAITING, EXPIRED, FINISHED
+    }
 }

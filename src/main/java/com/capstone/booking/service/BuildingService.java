@@ -4,13 +4,11 @@ import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.BuildingImage;
 import com.capstone.booking.domain.dao.Complex;
-import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.repository.*;
 import com.capstone.booking.util.ResponseUtil;
 import com.capstone.booking.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -67,7 +63,7 @@ public class BuildingService {
             List<BuildingRequest> buildingRequests = new ArrayList<>();
             for (Building building :
                     buildingList) {
-                Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(building.getId());
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
                 Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
                 BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
                 int floorCount = floorRepository.countByBuilding_Id(building.getId());
@@ -101,14 +97,16 @@ public class BuildingService {
                         HttpStatus.BAD_REQUEST);
             }
 
-            Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(id);
+            Set<String> types = floorRepository.findDistinctTypeByBuildingId(id);
             Double rating = reviewRepository.averageOfBuildingReviewRating(id);
+            Set<AppConstant.FacilityType> facilities = floorRepository.findDistinctFacilityByBuildingId(id);
 
             BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
             int floorCount = floorRepository.countByBuilding_Id(id);
             request.setOfficeType(types);
             request.setRating(Objects.requireNonNullElse(rating, 0.0));
             request.setFloorCount(floorCount);
+            request.setFacility(facilities);
 
             log.info("Successfully retrieved Building with ID : {}", id);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
