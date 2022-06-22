@@ -47,6 +47,9 @@ public class ReservationRequest {
     @Schema(type = "String")
     private String note;
 
+    @Schema(type = "String")
+    private String image;
+
     @Schema(hidden = true)
     private AppConstant.ReservationStatus status;
 }

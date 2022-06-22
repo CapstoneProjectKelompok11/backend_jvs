@@ -48,17 +48,53 @@ public class BuildingService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseEntity<Object> getBuilding(Long complexId, int page, int limit) {
-        log.info("Executing get all Building");
+    public ResponseEntity<Object> getBuilding(Long complexId, Integer page, Integer limit) {
+        log.info("Executing get all Building with Pagination");
         try {
             Pageable pageable = PageRequest.of(page, limit);
             Page<Building> buildingList;
             if(complexId == null) {
-                log.info("Complex Id is null. Getting all building");
+                log.info("Complex Id is null. Getting all building with Pagination");
                 buildingList = buildingRepository.findAll(pageable);
             } else {
-                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
+                log.info("Complex Id is not null. Getting all building with complex ID and Pagination : {}", complexId);
                 buildingList = buildingRepository.findAllByComplex_Id(complexId, pageable);
+            }
+            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            for (Building building :
+                    buildingList) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                request.setOfficeType(types);
+                request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
+                buildingRequests.add(request);
+            }
+
+            log.info("Successfully retrieved all Building with pagination");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    buildingRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get all building. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    public ResponseEntity<Object> getAllBuilding(Long complexId) {
+        log.info("Executing get all Building");
+        try {
+            List<Building> buildingList;
+            if(complexId == null) {
+                log.info("Complex Id is null. Getting all building");
+                buildingList = buildingRepository.findAll();
+            } else {
+                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
+                buildingList = buildingRepository.findAllByComplex_Id(complexId);
             }
             List<BuildingRequest> buildingRequests = new ArrayList<>();
             for (Building building :

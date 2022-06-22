@@ -53,6 +53,8 @@ public class Reservation extends BaseDAO {
     @Column(columnDefinition = "text")
     private String note;
 
+    private String image;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppConstant.ReservationStatus status;

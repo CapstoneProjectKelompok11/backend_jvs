@@ -15,6 +15,8 @@ public class AppConstant {
         UNKNOWN_ERROR("UNKNOWN_ERROR", "Happened unknown error!"),
 
         NOT_LOGGED_IN("NOT_LOGGED_IN", "Login first to access this endpoint"),
+        UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "You do not have permission to access this"),
+
         BAD_CREDENTIALS("BAD_CREDENTIALS", "Provided Credentials is wrong!");
 
         private final String code;
@@ -45,6 +47,6 @@ public class AppConstant {
     }
 
     public enum ReservationStatus {
-        PENDING, RESERVED, WAITING, EXPIRED, FINISHED
+        PENDING, ACTIVE, WAITING, EXPIRED, FINISHED
     }
 }

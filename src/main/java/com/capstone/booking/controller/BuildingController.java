@@ -21,9 +21,13 @@ public class BuildingController {
 
     @GetMapping("/buildings")
     public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "complexId", required = false) Long complexId,
-                                                 @RequestParam ("page") int page,
-                                                 @RequestParam ("limit") int limit) {
-        return buildingService.getBuilding(complexId, page, limit);
+                                                 @RequestParam ("page") Integer page,
+                                                 @RequestParam ("limit") Integer limit) {
+        if(page == null || limit == null){
+            return buildingService.getAllBuilding(complexId);
+        } else {
+            return buildingService.getBuilding(complexId, page, limit);
+        }
     }
 
     @GetMapping("/building")
