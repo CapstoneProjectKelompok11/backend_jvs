@@ -1,10 +1,12 @@
 package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
+import com.capstone.booking.domain.common.SearchSpecification;
 import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.BuildingImage;
 import com.capstone.booking.domain.dao.Complex;
 import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.SearchRequest;
 import com.capstone.booking.repository.*;
 import com.capstone.booking.util.ResponseUtil;
 import com.capstone.booking.util.FileUtil;
@@ -85,6 +87,40 @@ public class BuildingService {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<Object> getBuildings(SearchRequest request) {
+        try {
+            SearchSpecification<Building> specification = new SearchSpecification<>(request);
+            Pageable pageable = SearchSpecification.getPageable(request.getPage(), request.getSize());
+            Page<Building> buildings = buildingRepository.findAll(specification, pageable);
+            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            for (Building building :
+                    buildings) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest buildingRequest = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                Set<AppConstant.FacilityType> facilities = floorRepository.findDistinctFacilityByBuildingId(building.getId());
+
+                buildingRequest.setOfficeType(types);
+                buildingRequest.setRating(Objects.requireNonNullElse(rating, 0.0));
+                buildingRequest.setFacility(facilities);
+                buildingRequest.setFloorCount(floorCount);
+                buildingRequests.add(buildingRequest);
+            }
+            log.info("Successfully retrieved all Building");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    buildingRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get all building. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<Object> getAllBuilding(Long complexId) {
         log.info("Executing get all Building");
         try {
@@ -102,10 +138,13 @@ public class BuildingService {
                 Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
                 Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
                 BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                Set<AppConstant.FacilityType> facilities = floorRepository.findDistinctFacilityByBuildingId(building.getId());
+
                 int floorCount = floorRepository.countByBuilding_Id(building.getId());
                 request.setOfficeType(types);
                 request.setRating(Objects.requireNonNullElse(rating, 0.0));
                 request.setFloorCount(floorCount);
+                request.setFacility(facilities);
                 buildingRequests.add(request);
             }
 

@@ -1,6 +1,9 @@
 package com.capstone.booking.constant;
 
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class AppConstant {
 
     private AppConstant() {}
@@ -49,4 +52,6 @@ public class AppConstant {
     public enum ReservationStatus {
         PENDING, ACTIVE, WAITING, EXPIRED, FINISHED
     }
+
+
 }

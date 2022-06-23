@@ -51,5 +51,8 @@ public class Building extends BaseDAO {
     @OneToMany(mappedBy = "building")
     private List<BuildingImage> images;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "building")
+    private List<Review> reviews;
 
 }

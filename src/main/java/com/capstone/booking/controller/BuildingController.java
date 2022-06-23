@@ -1,6 +1,7 @@
 package com.capstone.booking.controller;
 
 import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.SearchRequest;
 import com.capstone.booking.service.BuildingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,10 @@ public class BuildingController {
         } else {
             return buildingService.getBuilding(complexId, page, limit);
         }
+    }
+    @GetMapping("/building1")
+    public ResponseEntity<Object> get(@RequestBody SearchRequest request) {
+        return buildingService.getBuildings(request);
     }
 
     @GetMapping("/building")
