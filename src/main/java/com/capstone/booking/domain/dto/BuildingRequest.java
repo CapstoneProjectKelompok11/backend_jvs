@@ -1,5 +1,6 @@
 package com.capstone.booking.domain.dto;
 
+import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.BuildingImage;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -54,4 +55,7 @@ public class BuildingRequest {
 
     @Schema(hidden = true)
     private ComplexRequest complex;
+
+    @Schema(type = "Set<FacilityType>")
+    private Set<AppConstant.FacilityType> facilities;
 }

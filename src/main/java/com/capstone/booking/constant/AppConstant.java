@@ -1,6 +1,9 @@
 package com.capstone.booking.constant;
 
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class AppConstant {
 
     private AppConstant() {}
@@ -15,6 +18,8 @@ public class AppConstant {
         UNKNOWN_ERROR("UNKNOWN_ERROR", "Happened unknown error!"),
 
         NOT_LOGGED_IN("NOT_LOGGED_IN", "Login first to access this endpoint"),
+        UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "You do not have permission to access this"),
+
         BAD_CREDENTIALS("BAD_CREDENTIALS", "Provided Credentials is wrong!");
 
         private final String code;
@@ -43,4 +48,10 @@ public class AppConstant {
     public enum FacilityType {
         PROJECTOR, WIFI, PARKING, BANK, RESTAURANT
     }
+
+    public enum ReservationStatus {
+        PENDING, ACTIVE, WAITING, CANCELED, FINISHED
+    }
+
+
 }

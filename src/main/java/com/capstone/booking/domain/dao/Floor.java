@@ -1,6 +1,5 @@
 package com.capstone.booking.domain.dao;
 
-import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.common.BaseDAO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +10,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -48,10 +46,6 @@ public class Floor extends BaseDAO {
 
     private String image;
 
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "facilities")
-    private Set<AppConstant.FacilityType> facilities;
-    //List of floor facility with Element Collection
+
 
 }

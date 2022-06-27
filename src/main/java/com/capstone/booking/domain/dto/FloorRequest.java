@@ -1,6 +1,5 @@
 package com.capstone.booking.domain.dto;
 
-import com.capstone.booking.constant.AppConstant;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -10,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
 
 
 @Data
@@ -41,6 +39,5 @@ public class FloorRequest {
     @Schema(hidden = true)
     private String image;
 
-    @Schema(type = "Set<FacilityType>")
-    private Set<AppConstant.FacilityType> facilities;
+
 }
