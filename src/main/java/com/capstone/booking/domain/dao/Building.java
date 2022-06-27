@@ -1,5 +1,6 @@
 package com.capstone.booking.domain.dao;
 
+import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.common.BaseDAO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -40,6 +42,11 @@ public class Building extends BaseDAO {
 
     private String buildingSize;
 
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "facilities")
+    private Set<AppConstant.FacilityType> facilities;
+
     @ManyToOne
     @JoinColumn(name = "complex_id")
     private Complex complex;
@@ -54,5 +61,7 @@ public class Building extends BaseDAO {
     @JsonIgnore
     @OneToMany(mappedBy = "building")
     private List<Review> reviews;
+
+
 
 }

@@ -50,7 +50,7 @@ public class AppConstant {
     }
 
     public enum ReservationStatus {
-        PENDING, ACTIVE, WAITING, EXPIRED, FINISHED
+        PENDING, ACTIVE, WAITING, CANCELED, FINISHED
     }
 
 

@@ -56,6 +56,6 @@ public class BuildingRequest {
     @Schema(hidden = true)
     private ComplexRequest complex;
 
-    @Schema(hidden = true)
-    private Set<AppConstant.FacilityType> facility;
+    @Schema(type = "Set<FacilityType>")
+    private Set<AppConstant.FacilityType> facilities;
 }
