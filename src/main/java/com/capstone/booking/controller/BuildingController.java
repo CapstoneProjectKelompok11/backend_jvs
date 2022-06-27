@@ -1,6 +1,7 @@
 package com.capstone.booking.controller;
 
 import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.SearchRequest;
 import com.capstone.booking.service.BuildingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +20,9 @@ public class BuildingController {
     @Autowired
     private BuildingService buildingService;
 
-    @GetMapping("/buildings")
-    public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "complexId", required = false) Long complexId,
-                                                 @RequestParam ("page") int page,
-                                                 @RequestParam ("limit") int limit) {
-        return buildingService.getBuilding(complexId, page, limit);
-    }
-
-    @GetMapping("/building")
-    public ResponseEntity<Object> getOneBuilding(@RequestParam (value = "id") Long id) {
-        return buildingService.getBuildingById(id);
+    @PostMapping("/building")
+    public ResponseEntity<Object> get(@RequestBody (required = false) SearchRequest request) {
+        return buildingService.getBuildings(request);
     }
 
     @PostMapping(value = "/admin/building")

@@ -1,16 +1,16 @@
 package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
+import com.capstone.booking.domain.common.SearchSpecification;
 import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.BuildingImage;
 import com.capstone.booking.domain.dao.Complex;
-import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.SearchRequest;
 import com.capstone.booking.repository.*;
 import com.capstone.booking.util.ResponseUtil;
 import com.capstone.booking.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -52,31 +50,25 @@ public class BuildingService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ResponseEntity<Object> getBuilding(Long complexId, int page, int limit) {
-        log.info("Executing get all Building");
+    public ResponseEntity<Object> getBuildings(SearchRequest request) {
+        log.info("Executing get Buildings");
         try {
-            Pageable pageable = PageRequest.of(page, limit);
-            Page<Building> buildingList;
-            if(complexId == null) {
-                log.info("Complex Id is null. Getting all building");
-                buildingList = buildingRepository.findAll(pageable);
-            } else {
-                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
-                buildingList = buildingRepository.findAllByComplex_Id(complexId, pageable);
-            }
+            SearchSpecification<Building> specification = new SearchSpecification<>(request);
+            Pageable pageable = SearchSpecification.getPageable(request.getPage(), request.getSize());
+            Page<Building> buildings = buildingRepository.findAll(specification, pageable);
             List<BuildingRequest> buildingRequests = new ArrayList<>();
             for (Building building :
-                    buildingList) {
-                Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(building.getId());
+                    buildings) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
                 Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
-                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                BuildingRequest buildingRequest = modelMapper.map(building, BuildingRequest.class);
                 int floorCount = floorRepository.countByBuilding_Id(building.getId());
-                request.setOfficeType(types);
-                request.setRating(Objects.requireNonNullElse(rating, 0.0));
-                request.setFloorCount(floorCount);
-                buildingRequests.add(request);
-            }
 
+                buildingRequest.setOfficeType(types);
+                buildingRequest.setRating(Objects.requireNonNullElse(rating, 0.0));
+                buildingRequest.setFloorCount(floorCount);
+                buildingRequests.add(buildingRequest);
+            }
             log.info("Successfully retrieved all Building");
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
                     buildingRequests,
@@ -90,38 +82,7 @@ public class BuildingService {
         }
     }
 
-    public ResponseEntity<Object> getBuildingById(Long id) {
-        log.info("Executing get Building with ID : {}", id);
-        try {
-            Optional<Building> building = buildingRepository.findById(id);
-            if(building.isEmpty()) {
-                log.info("Building with ID [{}] not found ", id);
-                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
-                        null,
-                        HttpStatus.BAD_REQUEST);
-            }
 
-            Set<String> types = floorRepository.findDistinctTypeByBuilding_Id(id);
-            Double rating = reviewRepository.averageOfBuildingReviewRating(id);
-
-            BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
-            int floorCount = floorRepository.countByBuilding_Id(id);
-            request.setOfficeType(types);
-            request.setRating(Objects.requireNonNullElse(rating, 0.0));
-            request.setFloorCount(floorCount);
-
-            log.info("Successfully retrieved Building with ID : {}", id);
-            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
-                    request,
-                    HttpStatus.OK);
-
-        } catch (Exception e) {
-            log.error("An error occurred while trying to get building with ID : {}. Error : {}", id, e.getMessage());
-            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
-                    null,
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     public ResponseEntity<Object> addNewBuilding(BuildingRequest req, Long complexId) {
         log.info("Executing create new Building");
