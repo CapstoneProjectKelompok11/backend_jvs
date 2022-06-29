@@ -42,7 +42,7 @@ public class ReservationController {
     }
 
     @PostMapping(value = "/auth/reservation/image", consumes = "multipart/form-data")
-    public ResponseEntity<Object> addImage(@RequestParam ("reservationid") Long reservationId,
+    public ResponseEntity<Object> addImage(@RequestParam ("reservationId") Long reservationId,
                                            @RequestPart ("image") MultipartFile file,
                                            Principal principal) throws IOException {
         if (principal != null){
@@ -52,7 +52,30 @@ public class ReservationController {
         }
     }
 
-    @GetMapping(value = "/admin/floor/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/admin/reservation/pending")
+    public ResponseEntity<Object> getPendingReservation() {
+        return reservationService.adminGetAllPendingReservation();
+    }
+
+    @GetMapping(value = "/admin/reservation")
+    public ResponseEntity<Object> getReservations() {
+        return reservationService.adminGetAllReservation();
+    }
+
+    @PutMapping(value = "/admin/reservation")
+    public ResponseEntity<Object> updateReservation(@RequestParam ("reservationId") Long reservationId,
+                                                    @RequestParam ("status") AppConstant.ReservationStatus status) {
+        return reservationService.updateReservationStatus(reservationId, status);
+    }
+
+    @PostMapping(value = "/admin/reservation")
+    public ResponseEntity<Object> adminAddReservation(@RequestParam ("reservationId") Long reservationId,
+                                                      @RequestParam ("floorId") Long floorId,
+                                                      @RequestBody ReservationRequest request) {
+        return reservationService.adminAddReservation(reservationId, request, floorId);
+    }
+
+    @GetMapping(value = "/admin/reservation/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<Object> getImage(@PathVariable String filename) {
         return reservationService.getImage(filename);
     }

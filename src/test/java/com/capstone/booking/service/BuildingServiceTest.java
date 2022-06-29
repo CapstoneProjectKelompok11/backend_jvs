@@ -66,6 +66,250 @@ class BuildingServiceTest {
     private BuildingService buildingService;
 
     @Test
+    void getBuilding_Success_Test() {
+        List<Building> buildingList = new ArrayList<>();
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        buildingList.add(building);
+
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Building> buildingPage = new PageImpl<Building>(buildingList.subList(0,1), pageable, buildingList.size());
+
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+
+        Double rating = 4.8;
+
+        int floorCount = 3;
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findAllByComplex_Id(anyLong(), any())).thenReturn(buildingPage);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuilding(1L, 0,1);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", result.get(0).getName());
+        assertEquals("Jalan A", result.get(0).getAddress());
+        assertEquals(100, result.get(0).getCapacity());
+        assertEquals(rating, result.get(0).getRating());
+        assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
+    }
+
+    @Test
+    void getBuilding_NoComplex_Test() {
+        List<Building> buildingList = new ArrayList<>();
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        buildingList.add(building);
+
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Building> buildingPage = new PageImpl<Building>(buildingList.subList(0,1), pageable, buildingList.size());
+
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+
+        Double rating = 4.8;
+
+        int floorCount = 3;
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findAll(any(Pageable.class))).thenReturn(buildingPage);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuilding(null, 0,1);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", result.get(0).getName());
+        assertEquals("Jalan A", result.get(0).getAddress());
+        assertEquals(100, result.get(0).getCapacity());
+        assertEquals(rating, result.get(0).getRating());
+        assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
+    }
+
+    @Test
+    void getBuilding_Error_Test() {
+        when(buildingRepository.findAll()).thenThrow(NullPointerException.class);
+        ResponseEntity<Object> responseEntity = buildingService.getBuilding(null, 0, 1);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+        assertEquals(AppConstant.ResponseCode.UNKNOWN_ERROR.getCode(), apiResponse.getStatus().getCode());
+    }
+
+    @Test
+    void getAllBuilding_Success_Test() {
+        List<Building> buildingList = new ArrayList<>();
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        buildingList.add(building);
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+        Double rating = 4.8;
+        int floorCount = 3;
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findAllByComplex_Id(anyLong())).thenReturn(buildingList);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getAllBuilding(1L);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", result.get(0).getName());
+        assertEquals("Jalan A", result.get(0).getAddress());
+        assertEquals(100, result.get(0).getCapacity());
+        assertEquals(rating, result.get(0).getRating());
+        assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
+    }
+
+    @Test
+    void getAllBuilding_NoComplex_Test() {
+        List<Building> buildingList = new ArrayList<>();
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        buildingList.add(building);
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+        Double rating = 4.8;
+        int floorCount = 3;
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findAll()).thenReturn(buildingList);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getAllBuilding(null);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", result.get(0).getName());
+        assertEquals("Jalan A", result.get(0).getAddress());
+        assertEquals(100, result.get(0).getCapacity());
+        assertEquals(rating, result.get(0).getRating());
+        assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
+    }
+
+    @Test
+    void getAllBuilding_Error_Test() {
+        when(buildingRepository.findAll()).thenThrow(NullPointerException.class);
+        ResponseEntity<Object> responseEntity = buildingService.getAllBuilding(null);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+        assertEquals(AppConstant.ResponseCode.UNKNOWN_ERROR.getCode(), apiResponse.getStatus().getCode());
+    }
+
+    @Test
+    void getBuildingById_Success_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+
+        Double rating = 4.8;
+
+        int floorCount = 3;
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", ((BuildingRequest) apiResponse.getData()).getName());
+    }
+
+    @Test
+    void getBuildingById_BuildingEmpty_Test() {
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void getBuildingById_Error_Test() {
+        when(buildingRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = buildingService.getBuildingById(1L);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+
+    @Test
     void getBuildings_Success_Test() {
         List<Building> buildingList = new ArrayList<>();
         Building building = Building.builder()
@@ -117,7 +361,7 @@ class BuildingServiceTest {
 
 
     @Test
-    void getBuilding_Error_Test() {
+    void getBuildings_Error_Test() {
         SearchRequest searchRequest = SearchRequest.builder()
                 .build();
         when(buildingRepository.findAll(any(Specification.class), any(Pageable.class)))

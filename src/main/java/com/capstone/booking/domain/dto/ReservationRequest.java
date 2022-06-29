@@ -30,12 +30,15 @@ public class ReservationRequest {
     @Schema(hidden = true)
     private FloorRequest floor;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
+    @Schema(hidden = true)
+    private BuildingRequest building;
+
     @Schema(type = "String", example = "20-06-2022 08:30:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
     private LocalDateTime startReservation;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
-    @Schema(type = "String", example = "20-06-2022 19:10:33")
+    @Schema(type = "String", format = "date-time", example = "20-06-2022 19:10:33")
     private LocalDateTime endReservation;
 
     @Schema(type = "String", example = "PT. Alterra Academy")
@@ -47,7 +50,7 @@ public class ReservationRequest {
     @Schema(type = "String")
     private String note;
 
-    @Schema(type = "String")
+    @Schema(hidden = true)
     private String image;
 
     @Schema(hidden = true)

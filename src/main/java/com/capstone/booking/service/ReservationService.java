@@ -4,6 +4,7 @@ import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dao.Reservation;
 import com.capstone.booking.domain.dao.User;
+import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.domain.dto.ReservationRequest;
 import com.capstone.booking.repository.FloorRepository;
@@ -56,21 +57,119 @@ public class ReservationService {
             }
 
             List<Reservation> reservations = reservationRepository
-                    .findAllReservationForUser(
-                            userOptional.get().getId(),
-                            AppConstant.ReservationStatus.WAITING,
-                            AppConstant.ReservationStatus.ACTIVE
-                            );
+                    .findAllByUser_IdAndStatusIsNot(userOptional.get().getId(), AppConstant.ReservationStatus.PENDING);
 
             List<ReservationRequest> requests = new ArrayList<>();
             for (Reservation reservation :
                     reservations) {
-                requests.add(modelMapper.map(reservation, ReservationRequest.class));
+                ReservationRequest request = modelMapper.map(reservation, ReservationRequest.class);
+                request.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+                requests.add(request);
+
             }
             log.info("Successfully retrieved all reservation with status reserved and waiting payment made by user {}", email);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, requests, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error occurred while trying to get user reservation. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> adminGetAllPendingReservation() {
+        try {
+            log.info("Getting all reservation with pending status");
+            List<Reservation> reservations = reservationRepository.findAllByStatusIs(AppConstant.ReservationStatus.PENDING);
+            List<ReservationRequest> requests = new ArrayList<>();
+            for (Reservation reservation :
+                    reservations) {
+                ReservationRequest request = modelMapper.map(reservation, ReservationRequest.class);
+                request.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+                requests.add(request);
+            }
+            log.info("Successfully retrieved all reservation with pending status");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, requests, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error occurred while trying to get pending reservation. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> adminGetAllReservation() {
+        log.info("Getting all reservation except pending status");
+        try {
+            List<Reservation> reservations = reservationRepository.findAllByStatusIsNot(AppConstant.ReservationStatus.PENDING);
+            List<ReservationRequest> requests = new ArrayList<>();
+            for (Reservation reservation :
+                    reservations) {
+                ReservationRequest request = modelMapper.map(reservation, ReservationRequest.class);
+                request.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+                requests.add(request);
+            }
+            log.info("Successfully retrieved all reservation except pending ");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, requests, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error occurred while trying to get all reservation. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> updateReservationStatus(Long reservationId, AppConstant.ReservationStatus status) {
+        log.info("Updating reservation ID [{}] status to {}", reservationId, status.toString());
+        try {
+            Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+            if(reservationOptional.isEmpty()){
+                log.info("Reservation with ID [{}] not found", reservationId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+            Reservation reservation = reservationOptional.get();
+            reservation.setStatus(status);
+            reservationRepository.save(reservation);
+
+            ReservationRequest request = modelMapper.map(reservation, ReservationRequest.class);
+            request.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    request,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error occurred while trying to get update reservation with ID : [{}]. Error : {}",
+                    reservationId, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> adminAddReservation(Long reservationId, ReservationRequest request, Long floorId) {
+        log.info("Add Order from Pending to Waiting for Payment");
+        try {
+            Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+            if(reservationOptional.isEmpty()){
+                log.info("Reservation with ID [{}] not found", reservationId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+            Optional<Floor> optionalFloor = floorRepository.findById(floorId);
+            if(optionalFloor.isEmpty()) {
+                log.info("Floor with ID [{}] not found ", floorId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
+                        null,
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Reservation reservation = reservationOptional.get();
+            reservation.setStartReservation(request.getStartReservation());
+            reservation.setEndReservation(request.getEndReservation());
+            reservation.setPrice(request.getPrice());
+            reservation.setCompany(request.getCompany());
+            reservation.setStatus(AppConstant.ReservationStatus.WAITING);
+            reservation.setFloor(optionalFloor.get());
+            reservationRepository.save(reservation);
+
+            ReservationRequest reservationRequest = modelMapper.map(reservation, ReservationRequest.class);
+            reservationRequest.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, reservationRequest, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error occurred while admin is trying to get add reservation with ID : [{}]. Error : {}",
+                    reservationId, e.getMessage());
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -97,6 +196,7 @@ public class ReservationService {
             reservation.setUser(userOptional.get());
             reservation.setFloor(optionalFloor.get());
             reservation.setStatus(AppConstant.ReservationStatus.PENDING);
+            reservation.setImage(null);
             reservationRepository.save(reservation);
 
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
@@ -131,6 +231,13 @@ public class ReservationService {
             if(!reservationOptional.get().getUser().equals(userOptional.get())) {
                 log.info("User with email [{}] does not have access to reservation made by User [{}]",
                         email, userOptional.get().getEmail());
+                return ResponseUtil.build(AppConstant.ResponseCode.UNAUTHORIZED_ACCESS,
+                        null,
+                        HttpStatus.FORBIDDEN);
+            }
+
+            if(!reservationOptional.get().getStatus().equals(AppConstant.ReservationStatus.WAITING) ) {
+                log.info("Reservation has not been approved yet by admin");
                 return ResponseUtil.build(AppConstant.ResponseCode.UNAUTHORIZED_ACCESS,
                         null,
                         HttpStatus.FORBIDDEN);
