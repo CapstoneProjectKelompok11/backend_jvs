@@ -20,6 +20,22 @@ public class BuildingController {
     @Autowired
     private BuildingService buildingService;
 
+    @GetMapping("/buildings")
+    public ResponseEntity<Object> getAllBuilding(@RequestParam (value = "complexId", required = false) Long complexId,
+                                                 @RequestParam (required = false, value = "page") Integer page,
+                                                 @RequestParam (required = false, value = "limit") Integer limit) {
+        if(page == null || limit == null){
+            return buildingService.getAllBuilding(complexId);
+        } else {
+            return buildingService.getBuilding(complexId, page, limit);
+        }
+    }
+
+    @GetMapping("/building")
+    public ResponseEntity<Object> getOneBuilding(@RequestParam (value = "id") Long id) {
+        return buildingService.getBuildingById(id);
+    }
+
     @PostMapping("/building")
     public ResponseEntity<Object> get(@RequestBody (required = false) SearchRequest request) {
         return buildingService.getBuildings(request);
