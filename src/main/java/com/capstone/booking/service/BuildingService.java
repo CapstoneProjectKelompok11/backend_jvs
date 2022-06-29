@@ -50,6 +50,113 @@ public class BuildingService {
     @Autowired
     private ModelMapper modelMapper;
 
+    public ResponseEntity<Object> getBuilding(Long complexId, Integer page, Integer limit) {
+        log.info("Executing get all Building with Pagination");
+        try {
+            Pageable pageable = PageRequest.of(page, limit);
+            Page<Building> buildingList;
+            if(complexId == null) {
+                log.info("Complex Id is null. Getting all building with Pagination");
+                buildingList = buildingRepository.findAll(pageable);
+            } else {
+                log.info("Complex Id is not null. Getting all building with complex ID and Pagination : {}", complexId);
+                buildingList = buildingRepository.findAllByComplex_Id(complexId, pageable);
+            }
+            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            for (Building building :
+                    buildingList) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                request.setOfficeType(types);
+                request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
+                buildingRequests.add(request);
+            }
+
+            log.info("Successfully retrieved all Building with pagination");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    buildingRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get all building. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    public ResponseEntity<Object> getAllBuilding(Long complexId) {
+        log.info("Executing get all Building");
+        try {
+            List<Building> buildingList;
+            if(complexId == null) {
+                log.info("Complex Id is null. Getting all building");
+                buildingList = buildingRepository.findAll();
+            } else {
+                log.info("Complex Id is not null. Getting all building with complex ID : {}", complexId);
+                buildingList = buildingRepository.findAllByComplex_Id(complexId);
+            }
+            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            for (Building building :
+                    buildingList) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                request.setOfficeType(types);
+                request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
+                buildingRequests.add(request);
+            }
+
+            log.info("Successfully retrieved all Building");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    buildingRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get all building. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> getBuildingById(Long id) {
+        log.info("Executing get Building with ID : {}", id);
+        try {
+            Optional<Building> building = buildingRepository.findById(id);
+            if(building.isEmpty()) {
+                log.info("Building with ID [{}] not found ", id);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
+                        null,
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Set<String> types = floorRepository.findDistinctTypeByBuildingId(id);
+            Double rating = reviewRepository.averageOfBuildingReviewRating(id);
+
+            BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+            int floorCount = floorRepository.countByBuilding_Id(id);
+            request.setOfficeType(types);
+            request.setRating(Objects.requireNonNullElse(rating, 0.0));
+            request.setFloorCount(floorCount);
+
+            log.info("Successfully retrieved Building with ID : {}", id);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    request,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get building with ID : {}. Error : {}", id, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     public ResponseEntity<Object> getBuildings(SearchRequest request) {
         log.info("Executing get Buildings");
         try {
