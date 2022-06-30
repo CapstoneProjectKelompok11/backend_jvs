@@ -2,9 +2,11 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.common.ApiResponse;
+import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dao.Reservation;
 import com.capstone.booking.domain.dao.User;
+import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.domain.dto.ReservationRequest;
 import com.capstone.booking.repository.FloorRepository;
@@ -62,20 +64,28 @@ class ReservationServiceTest {
                 .email("some-email@email.com")
                 .build();
         List<Reservation> reservations = new ArrayList<>();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
         Reservation reservation = Reservation.builder()
                 .id(1L)
                 .status(AppConstant.ReservationStatus.WAITING)
+                .floor(floor)
                 .build();
         ReservationRequest request = ReservationRequest.builder()
                 .id(1L)
                 .status(AppConstant.ReservationStatus.WAITING)
                 .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
         reservations.add(reservation);
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
-        when(reservationRepository.findAllReservationForUser(anyLong(),
-                any(AppConstant.ReservationStatus.class),
+        when(reservationRepository.findAllByUser_IdAndStatusIsNot(anyLong(),
                 any(AppConstant.ReservationStatus.class))).thenReturn(reservations);
         when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
 
         ResponseEntity<Object> responseEntity = reservationService.userGetAllReservation("email");
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
