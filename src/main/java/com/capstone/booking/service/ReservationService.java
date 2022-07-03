@@ -5,7 +5,6 @@ import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dao.Reservation;
 import com.capstone.booking.domain.dao.User;
 import com.capstone.booking.domain.dto.BuildingRequest;
-import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.domain.dto.ReservationRequest;
 import com.capstone.booking.repository.FloorRepository;
 import com.capstone.booking.repository.ReservationRepository;
@@ -157,7 +156,6 @@ public class ReservationService {
 
             Reservation reservation = reservationOptional.get();
             reservation.setStartReservation(request.getStartReservation());
-            reservation.setEndReservation(request.getEndReservation());
             reservation.setPrice(request.getPrice());
             reservation.setCompany(request.getCompany());
             reservation.setStatus(AppConstant.ReservationStatus.WAITING);
@@ -199,8 +197,12 @@ public class ReservationService {
             reservation.setImage(null);
             reservationRepository.save(reservation);
 
+            ReservationRequest reservationRequest = modelMapper.map(reservation, ReservationRequest.class);
+            reservationRequest.setBuilding(modelMapper.map(reservation.getFloor().getBuilding(), BuildingRequest.class));
+
+
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
-                    modelMapper.map(reservation, ReservationRequest.class),
+                    reservationRequest,
                     HttpStatus.OK);
 
         } catch (Exception e) {

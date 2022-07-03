@@ -66,24 +66,24 @@ class ReviewServiceTest {
         Pageable pageable = PageRequest.of(0, 1);
         Page<Review> reviewPage = new PageImpl<Review>(reviews.subList(0,1), pageable, reviews.size());
 
-        when(reviewRepository.findAllByBuilding_Id(anyLong(), any(Pageable.class))).thenReturn(reviewPage);
+        when(reviewRepository.findAllByBuildingId(anyLong(), any(Pageable.class))).thenReturn(reviewPage);
         when(modelMapper.map(any(), eq(ReviewRequest.class))).thenReturn(request);
 
         ResponseEntity<Object> responseEntity = reviewService.getReviewByBuildingId(1L, 0,1);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
-        List<ReviewRequest> result = ((List<ReviewRequest>) apiResponse.getData());
+        Page<ReviewRequest> result = ((Page<ReviewRequest>) apiResponse.getData());
 
         assertNotNull(apiResponse);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("this is review", result.get(0).getReview());
-        assertEquals(5, result.get(0).getRating());
+        assertEquals("this is review", result.getContent().get(0).getReview());
+        assertEquals(5, result.getContent().get(0).getRating());
     }
 
     @Test
     void getReviewByBuildingId_Error_Test() {
 
-        when(reviewRepository.findAllByBuilding_Id(anyLong(), any(Pageable.class))).thenThrow(NullPointerException.class);
+        when(reviewRepository.findAllByBuildingId(anyLong(), any(Pageable.class))).thenThrow(NullPointerException.class);
 
         ResponseEntity<Object> responseEntity = reviewService.getReviewByBuildingId(1L, 0,1);
 

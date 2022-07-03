@@ -27,6 +27,18 @@ public class ReviewController {
         return reviewService.getReviewByBuildingId(buildingId, page, limit);
     }
 
+    @GetMapping("/admin/review")
+    public ResponseEntity<Object> getReviewForAdmin () {
+        return reviewService.getAllReviewForApproval();
+    }
+
+    @PutMapping("/admin/review")
+    public ResponseEntity<Object> updateReviewApproval(@RequestParam ("userId") Long userId,
+                                                       @RequestParam ("buildingId") Long buildingId,
+                                                       Boolean approved) {
+        return reviewService.updateApproval(userId, buildingId, approved);
+    }
+
     @PostMapping("/auth/review")
     public ResponseEntity<Object> addReview (@RequestBody ReviewRequest request,
                                              @RequestParam ("buildingId") Long buildingId,
