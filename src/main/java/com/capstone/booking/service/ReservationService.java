@@ -212,6 +212,53 @@ public class ReservationService {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public ResponseEntity<Object> userCancelReservation(Long reservationId, String email) {
+        log.info("Canceling reservation with ID : [{}]", reservationId);
+        try {
+            Optional<User> userOptional = userRepository.findUserByEmail(email);
+            if(userOptional.isEmpty()) {
+                log.info("User with Email [{}] not found ", email);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
+                        null,
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+            if(reservationOptional.isEmpty()) {
+                log.info("Reservation with ID [{}] not found", reservationId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+
+            if(!reservationOptional.get().getUser().equals(userOptional.get())) {
+                log.info("User with email [{}] does not have access to reservation made by User [{}]",
+                        email, userOptional.get().getEmail());
+                return ResponseUtil.build(AppConstant.ResponseCode.UNAUTHORIZED_ACCESS,
+                        null,
+                        HttpStatus.FORBIDDEN);
+            }
+            if(!reservationOptional.get().getStatus().equals(AppConstant.ReservationStatus.WAITING) ) {
+                log.info("Reservation can only be cancelled before sending payment");
+                return ResponseUtil.build(AppConstant.ResponseCode.UNAUTHORIZED_ACCESS,
+                        null,
+                        HttpStatus.FORBIDDEN);
+            }
+            Reservation reservation = reservationOptional.get();
+            reservation.setStatus(AppConstant.ReservationStatus.CANCELED);
+            reservationRepository.save(reservation);
+            log.info("Successfully canceled the reservation");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    modelMapper.map(reservation, ReservationRequest.class),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error occurred while trying to cancel reservation. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<Object> addPayment(Long reservationId, MultipartFile file, String email) throws IOException {
         log.info("Executing add payment image to reservation with ID : {}", reservationId);
         try {
@@ -238,7 +285,7 @@ public class ReservationService {
                         HttpStatus.FORBIDDEN);
             }
 
-            if(!reservationOptional.get().getStatus().equals(AppConstant.ReservationStatus.WAITING) ) {
+            if(reservationOptional.get().getStatus().equals(AppConstant.ReservationStatus.PENDING) ) {
                 log.info("Reservation has not been approved yet by admin");
                 return ResponseUtil.build(AppConstant.ResponseCode.UNAUTHORIZED_ACCESS,
                         null,
@@ -267,6 +314,8 @@ public class ReservationService {
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     public ResponseEntity<Object> getImage(String filename) {
         return FileUtil.getFileContent(path, filename);

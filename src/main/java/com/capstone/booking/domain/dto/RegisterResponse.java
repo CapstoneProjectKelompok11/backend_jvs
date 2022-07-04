@@ -23,4 +23,6 @@ public class RegisterResponse {
     private String phone;
 
     private String email;
+
+    private String image;
 }

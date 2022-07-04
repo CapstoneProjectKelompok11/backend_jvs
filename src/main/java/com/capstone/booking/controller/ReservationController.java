@@ -68,6 +68,16 @@ public class ReservationController {
         return reservationService.updateReservationStatus(reservationId, status);
     }
 
+    @PutMapping(value = "/auth/reservation/cancel")
+    public ResponseEntity<Object> cancelReservation(@RequestParam ("reservationId") Long reservationId,
+                                                    Principal principal) {
+        if (principal != null){
+            return reservationService.userCancelReservation(reservationId, principal.getName());
+        } else {
+            return ResponseUtil.build(AppConstant.ResponseCode.NOT_LOGGED_IN, null, HttpStatus.FORBIDDEN);
+        }
+    }
+
     @PostMapping(value = "/admin/reservation")
     public ResponseEntity<Object> adminAddReservation(@RequestParam ("reservationId") Long reservationId,
                                                       @RequestParam ("floorId") Long floorId,
