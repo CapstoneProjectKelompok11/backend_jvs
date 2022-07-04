@@ -4,6 +4,7 @@ import com.capstone.booking.domain.dao.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.security.Keys;
@@ -19,13 +20,14 @@ public class JwtTokenProvider {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     // batas waktu ekspirasi jwt dalam millisecond
-    private final Long expiration = 1000L * 3600; //1 jam
+    @Value("${token.expiration.hour:1}")
+    private Long expiration;
 
     public String generateToken(Authentication authentication){
         final User user = (User) authentication.getPrincipal();
 
         Date now = new Date(System.currentTimeMillis());
-        Date expireDate = new Date(now.getTime() + expiration);
+        Date expireDate = new Date(now.getTime() + expiration * 3600000L);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getUsername());

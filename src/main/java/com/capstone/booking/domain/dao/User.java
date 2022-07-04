@@ -43,6 +43,8 @@ public class User extends BaseDAO implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    private String image;
+
     @Builder.Default
     @Column(columnDefinition = "boolean default true")
     private boolean active = true;

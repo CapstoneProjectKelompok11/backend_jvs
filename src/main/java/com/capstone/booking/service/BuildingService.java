@@ -217,6 +217,53 @@ public class BuildingService {
         }
     }
 
+    public ResponseEntity<Object> updateBuilding(Long buildingId, BuildingRequest request) {
+        log.info("Updating a Building with ID : [{}]", buildingId);
+        try {
+            Optional<Building> buildingOptional = buildingRepository.findById(buildingId);
+            if(buildingOptional.isEmpty()) {
+                log.info("Building with ID : [{}] is not found", buildingId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+
+            Building building = Building.builder()
+                    .name(request.getName())
+                    .address(request.getAddress())
+                    .description(request.getDescription())
+                    .capacity(request.getCapacity())
+                    .buildingSize(request.getBuildingSize())
+                    .facilities(request.getFacilities())
+                    .build();
+            buildingRepository.save(building);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    modelMapper.map(building, BuildingRequest.class),
+                    HttpStatus.OK);
+
+        } catch (Exception e){
+            log.error("An error occurred while trying to update building with ID : [{}]. Error : [{}]", buildingId, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> deleteBuilding(Long buildingId) {
+        log.info("Deleting building with ID : [{}]", buildingId);
+        try {
+            Optional<Building> buildingOptional = buildingRepository.findById(buildingId);
+            if(buildingOptional.isEmpty()) {
+                log.info("Building with ID : [{}] is not found", buildingId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+
+            buildingRepository.delete(buildingOptional.get());
+            log.info("Successfully deleted building with ID : [{}]", buildingId);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, null, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to delete building with ID : [{}]. Error : [{}]", buildingId, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public ResponseEntity<Object> addImage(Long buildingId, MultipartFile image) throws IOException {
         log.info("Executing add image to building with ID : {}", buildingId);
         //Checking building exist or not on database

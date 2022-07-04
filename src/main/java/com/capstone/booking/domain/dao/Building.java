@@ -44,7 +44,7 @@ public class Building extends BaseDAO {
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "facilities")
+    @CollectionTable(name = "M_FACILITIES")
     private Set<AppConstant.FacilityType> facilities;
 
     @ManyToOne

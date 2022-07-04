@@ -68,13 +68,13 @@ class AuthServiceTest {
                 "password"
         );
 
-        RegisterResponse response = new RegisterResponse(
-                1L,
-                "Felix",
-                "Reinaldo",
-                "08569156485",
-                "felixreinaldo@gmail.com"
-        );
+        RegisterResponse response = RegisterResponse.builder()
+                .id(1L)
+                .firstName("Felix")
+                .lastName("Reinaldo")
+                .phone("08554865949")
+                .email("felixreinaldo@gmail.com")
+                .build();
 
         User user = User.builder()
                 .id(1L)
@@ -96,7 +96,7 @@ class AuthServiceTest {
         assertEquals("felixreinaldo@gmail.com", ((RegisterResponse) apiResponse.getData()).getEmail());
         assertEquals("Felix", ((RegisterResponse) apiResponse.getData()).getFirstName());
         assertEquals("Reinaldo", ((RegisterResponse) apiResponse.getData()).getLastName());
-        assertEquals("08569156485", ((RegisterResponse) apiResponse.getData()).getPhone());
+        assertEquals("08554865949", ((RegisterResponse) apiResponse.getData()).getPhone());
     }
 
     @Test

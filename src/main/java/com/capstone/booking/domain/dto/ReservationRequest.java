@@ -37,15 +37,15 @@ public class ReservationRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
     private LocalDateTime startReservation;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
-    @Schema(type = "String", format = "date-time", example = "20-06-2022 19:10:33")
-    private LocalDateTime endReservation;
 
     @Schema(type = "String", example = "PT. Alterra Academy")
     private String company;
 
     @Schema(type = "Long", example = "4300000")
     private Long price;
+
+    @Schema(type = "String", example = "08248435468")
+    private String phone;
 
     @Schema(type = "String")
     private String note;

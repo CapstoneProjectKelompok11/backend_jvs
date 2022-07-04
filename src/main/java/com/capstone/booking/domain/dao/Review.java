@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "M_REVIEW")
-@SQLDelete(sql = "UPDATE M_REVIEW SET is_deleted = true WHERE user_id = ? and building_id = ?")
+@Table(name = "T_REVIEW")
+@SQLDelete(sql = "UPDATE T_REVIEW SET is_deleted = true WHERE user_id = ? and building_id = ?")
 @Where(clause = "is_deleted = false")
 @IdClass(Review.ReviewId.class)
 public class Review extends BaseDAO {
@@ -48,6 +48,8 @@ public class Review extends BaseDAO {
 
     @Column(nullable = false)
     private int rating;
+
+    private Boolean isApproved;
 
     private LocalDateTime reviewDate;
 

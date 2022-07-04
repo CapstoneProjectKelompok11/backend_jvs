@@ -4,7 +4,7 @@ import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.Review;
 import com.capstone.booking.domain.dao.User;
-import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.ReviewAdminResponse;
 import com.capstone.booking.domain.dto.ReviewRequest;
 import com.capstone.booking.repository.BuildingRepository;
 import com.capstone.booking.repository.ReviewRepository;
@@ -14,19 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -47,23 +45,76 @@ public class ReviewService {
         log.info("Executing get all Review by Building ID [{}]", buildingId);
         try {
             Pageable pageable = PageRequest.of(page, limit);
-            Page<Review> reviews = reviewRepository.findAllByBuilding_Id(buildingId, pageable);
+            Page<Review> reviews = reviewRepository.findAllByBuildingId(buildingId, pageable);
             List<ReviewRequest> reviewRequests = new ArrayList<>();
             for (Review review :
                     reviews) {
                 ReviewRequest request = modelMapper.map(review, ReviewRequest.class);
                 reviewRequests.add(request);
             }
+            Page<ReviewRequest> requests = new PageImpl<>(reviewRequests, pageable, reviewRequests.size());
 
             log.info("Successfully retrieved Reviews by Building ID [{}]", buildingId);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
-                    reviewRequests,
+                    requests,
                     HttpStatus.OK);
 
         } catch (Exception e) {
             log.error("An error occurred while trying to get Reviews by Building ID [{}]. Error : {}",
                     buildingId,
                     e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> getAllReviewForApproval () {
+        log.info("Executing get all Review with null isApproved value");
+        try {
+            List<Review> reviews = reviewRepository.findAllByIsApprovedIsNull();
+            List<ReviewAdminResponse> reviewRequests = new ArrayList<>();
+            for (Review review :
+                    reviews) {
+                ReviewAdminResponse request = modelMapper.map(review, ReviewAdminResponse.class);
+                reviewRequests.add(request);
+            }
+
+            log.info("Successfully retrieved Reviews with null isApproved value");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    reviewRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get All Reviews with null isApproved value . Error : {}",
+                    e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> updateApproval(Long userId, Long buildingId, Boolean approved) {
+        log.info("Updating the approval of review from user ID : [{}] to building ID [{}]", userId, buildingId);
+        try {
+            Optional<Review> reviewOptional = reviewRepository.findByUserIdAndBuildingId(userId, buildingId);
+            if (reviewOptional.isEmpty()) {
+                log.info("Review from user ID : [{}] to building ID : [{}] not found ", userId, buildingId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+
+            Review review = reviewOptional.get();
+            review.setIsApproved(approved);
+            reviewRepository.save(review);
+
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    modelMapper.map(review, ReviewAdminResponse.class),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("An error occurred while trying to update approval of review from user ID : [{}] " +
+                            "to building ID [{}] to {} . Error : {}",
+                    userId, buildingId, approved, e.getMessage());
+
             return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
                     null,
                     HttpStatus.INTERNAL_SERVER_ERROR);
