@@ -65,6 +65,52 @@ public class FloorService {
         }
     }
 
+    public ResponseEntity<Object> updateFloor(Long floorId, FloorRequest floorRequest) {
+        log.info("Updating Floor with ID [{}]", floorId);
+        try {
+            Optional<Floor> floorOptional = floorRepository.findById(floorId);
+            if(floorOptional.isEmpty()) {
+                log.info("Floor with ID : [{}] is not found", floorId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+            Floor floor = floorOptional.get();
+            floor.setName(floorRequest.getName());
+            floor.setType(floorRequest.getType());
+            floor.setMaxCapacity(floorRequest.getMaxCapacity());
+            floor.setSize(floorRequest.getFloorSize());
+            floor.setStartingPrice(floorRequest.getStartingPrice());
+            floorRepository.save(floor);
+
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    modelMapper.map(floor, FloorRequest.class),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to update flor with ID : [{}]. Error : [{}]", floorId, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<Object> deleteFloor(Long floorId) {
+        log.info("Deleting Floor with ID : [{}]", floorId);
+        try {
+            Optional<Floor> floorOptional = floorRepository.findById(floorId);
+            if(floorOptional.isEmpty()) {
+                log.info("Floor with ID : [{}] is not found", floorId);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
+            }
+
+            floorRepository.delete(floorOptional.get());
+            log.info("Successfully deleted floor with ID : [{}]", floorId);
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, null, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to delete flor with ID : [{}]. Error : [{}]", floorId, e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     public ResponseEntity<Object> addFloor(FloorRequest req, Long buildingId) {
         log.info("Executing create new Floor");
         try {

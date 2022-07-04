@@ -36,6 +36,17 @@ public class BuildingController {
         return buildingService.getBuildingById(id);
     }
 
+    @PutMapping("/admin/building")
+    public ResponseEntity<Object> updateBuilding(@RequestParam ("buildingId") Long buildingId,
+                                                 @RequestBody BuildingRequest buildingRequest) {
+        return buildingService.updateBuilding(buildingId, buildingRequest);
+    }
+
+    @DeleteMapping("/admin/building")
+    public ResponseEntity<Object> deleteBuilding(@RequestParam ("buildingId") Long buildingId) {
+        return buildingService.deleteBuilding(buildingId);
+    }
+
     @PostMapping("/building")
     public ResponseEntity<Object> get(@RequestBody (required = false) SearchRequest request) {
         return buildingService.getBuildings(request);

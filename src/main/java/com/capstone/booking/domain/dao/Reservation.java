@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "M_RESERVATION")
-@SQLDelete(sql = "UPDATE M_RESERVATION SET is_deleted = true WHERE id = ?")
+@Table(name = "T_RESERVATION")
+@SQLDelete(sql = "UPDATE T_RESERVATION SET is_deleted = true WHERE id = ?")
 @Where(clause = "is_deleted = false")
 public class Reservation extends BaseDAO {
 
@@ -41,14 +41,13 @@ public class Reservation extends BaseDAO {
     @Column(nullable = false)
     private LocalDateTime startReservation;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = AppConstant.DATETIME_JSON_FORMAT)
-    @Column(nullable = false)
-    private LocalDateTime endReservation;
-
     private String company;
 
     @Column(nullable = false)
     private Long price;
+
+    @Column(nullable = false)
+    private String phone;
 
     @Column(columnDefinition = "text")
     private String note;

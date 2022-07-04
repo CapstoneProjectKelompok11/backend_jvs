@@ -1,5 +1,5 @@
-INSERT INTO role (id, name) VALUES (1, 0);
-INSERT INTO role (id, name) VALUES (2, 1);
+INSERT INTO m_role (id, name) VALUES (1, 0);
+INSERT INTO m_role (id, name) VALUES (2, 1);
 INSERT INTO m_city (id, created_at, is_deleted, updated_at, name) VALUES (1, now(), false, now(), 'Jakarta Pusat'),
                                                                          (2, now(), false, now(), 'Jakarta Barat'),
                                                                          (3, now(), false, now(), 'Jakarta Timur'),
@@ -33,7 +33,7 @@ VALUES (1, now(), false, now(), 'e6b60773-ba1e-435b-a882-6b844e1e2209.jpg', 12, 
     (7, now(), false, now(), 'e6b60773-ba1e-435b-a882-6b844e1e2209.jpg', 1, 'Floor 1', '400 x 700 m2', 1700000, 'Event Space', 4),
     (8, now(), false, now(), 'fc8b71d5-ea18-4f3e-823d-4f94415f40cb.jpg', 1, 'Floor 1', '400 x 700 m2', 3300000, 'Serviced Office', 4);
 
-INSERT INTO facilities (building_id, facilities) VALUES (1, 'WIFI'),
+INSERT INTO m_facilities (building_id, facilities) VALUES (1, 'WIFI'),
                                                      (1, 'BANK'),
                                                      (1, 'PROJECTOR'),
                                                      (2, 'WIFI'),

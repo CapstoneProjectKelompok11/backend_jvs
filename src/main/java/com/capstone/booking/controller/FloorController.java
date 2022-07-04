@@ -29,11 +29,25 @@ public class FloorController {
         return floorService.addFloor(request, buildingId);
     }
 
+    @PutMapping(value = "/admin/floor")
+    public ResponseEntity<Object> updateFloor(@RequestParam ("floorId") Long floorId,
+                                              @RequestBody FloorRequest request) {
+        return floorService.updateFloor(floorId, request);
+    }
+
+    @DeleteMapping(value = "/admin/floor")
+    public ResponseEntity<Object> deleteFloor(@RequestParam ("floorId") Long floorId) {
+        return floorService.deleteFloor(floorId);
+    }
+
     @PostMapping(value = "/admin/floor/image", consumes = "multipart/form-data")
     public ResponseEntity<Object> addImage(@RequestParam ("floorId") Long floorId,
                                            @RequestPart ("image") MultipartFile file) throws IOException {
         return floorService.addImageToFloor(floorId, file);
     }
+
+
+
 
     @GetMapping(value = "/floor/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<Object> getImage(@PathVariable String filename) throws IOException {
