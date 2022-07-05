@@ -47,6 +47,9 @@ public class ReservationRequest {
     @Schema(type = "String", example = "08248435468")
     private String phone;
 
+    @Schema(type = "int", example = "9")
+    private Integer participant;
+
     @Schema(type = "String")
     private String note;
 
