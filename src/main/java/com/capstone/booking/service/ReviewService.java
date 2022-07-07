@@ -52,11 +52,10 @@ public class ReviewService {
                 ReviewRequest request = modelMapper.map(review, ReviewRequest.class);
                 reviewRequests.add(request);
             }
-            Page<ReviewRequest> requests = new PageImpl<>(reviewRequests, pageable, reviewRequests.size());
 
             log.info("Successfully retrieved Reviews by Building ID [{}]", buildingId);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
-                    requests,
+                    reviewRequests,
                     HttpStatus.OK);
 
         } catch (Exception e) {
