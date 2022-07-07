@@ -6,6 +6,7 @@ import com.capstone.booking.domain.dao.Reservation;
 import com.capstone.booking.domain.dao.User;
 import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.ReservationRequest;
+import com.capstone.booking.domain.dto.ReservationUserRequest;
 import com.capstone.booking.repository.FloorRepository;
 import com.capstone.booking.repository.ReservationRepository;
 import com.capstone.booking.repository.UserRepository;
@@ -159,6 +160,7 @@ public class ReservationService {
             reservation.setPrice(request.getPrice());
             reservation.setCompany(request.getCompany());
             reservation.setStatus(AppConstant.ReservationStatus.WAITING);
+            reservation.setParticipant(request.getParticipant());
             reservation.setFloor(optionalFloor.get());
             reservationRepository.save(reservation);
 
@@ -172,7 +174,7 @@ public class ReservationService {
         }
     }
 
-    public ResponseEntity<Object> userAddReservation(ReservationRequest request, Long floorId, String email) {
+    public ResponseEntity<Object> userAddReservation(ReservationUserRequest request, Long floorId, String email) {
         try {
             Optional<User> userOptional = userRepository.findUserByEmail(email);
             if(userOptional.isEmpty()) {
@@ -194,6 +196,7 @@ public class ReservationService {
             reservation.setUser(userOptional.get());
             reservation.setFloor(optionalFloor.get());
             reservation.setStatus(AppConstant.ReservationStatus.PENDING);
+            reservation.setPrice((long) optionalFloor.get().getStartingPrice());
             reservation.setImage(null);
             reservationRepository.save(reservation);
 

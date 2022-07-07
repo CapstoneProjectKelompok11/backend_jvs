@@ -2,6 +2,7 @@ package com.capstone.booking.controller;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dto.ReservationRequest;
+import com.capstone.booking.domain.dto.ReservationUserRequest;
 import com.capstone.booking.service.ReservationService;
 import com.capstone.booking.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class ReservationController {
     }
 
     @PostMapping("/auth/reservation")
-    public ResponseEntity<Object> addReservation (@RequestBody ReservationRequest request,
+    public ResponseEntity<Object> addReservation (@RequestBody ReservationUserRequest request,
                                                   @RequestParam ("floorId") Long floorId,
                                                   Principal principal) {
         if (principal != null){
