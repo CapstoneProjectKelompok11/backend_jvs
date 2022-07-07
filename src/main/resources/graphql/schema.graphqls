@@ -16,7 +16,8 @@ type Mutation {
     sendMessage(input: ChatForm!): Chat!
 }
 type Query {
-    getChatBySender(senderId: Int!): [Chat]
+    getChatByUser(userId: Int!): [Chat]
+    getChatForAdmin(userId: Int!): [Chat]
 }
 
 input ChatForm {

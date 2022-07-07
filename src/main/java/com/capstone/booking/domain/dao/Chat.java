@@ -24,6 +24,7 @@ public class Chat {
     @JoinColumn(name = "receiverId")
     private User receiver;
 
+    @Column(columnDefinition = "text")
     private String message;
 
     private LocalDateTime timestamp;

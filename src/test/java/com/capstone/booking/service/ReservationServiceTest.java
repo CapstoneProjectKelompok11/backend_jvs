@@ -351,4 +351,405 @@ class ReservationServiceTest {
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
     }
+
+    @Test
+    void adminGetAllPendingReservation_Success_Test() {
+        List<Reservation> reservations = new ArrayList<>();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.PENDING)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.PENDING)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+        reservations.add(reservation);
+
+        when(reservationRepository.findAllByStatusIs(any())).thenReturn(reservations);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminGetAllPendingReservation();
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(AppConstant.ReservationStatus.PENDING, ((List<ReservationRequest>) apiResponse.getData()).get(0).getStatus());
+    }
+
+    @Test
+    void adminGetAllPendingReservation_Error_Test() {
+        when(reservationRepository.findAllByStatusIs(any())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminGetAllPendingReservation();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void adminGetAllReservation_Success_Test() {
+        List<Reservation> reservations = new ArrayList<>();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+        reservations.add(reservation);
+
+        when(reservationRepository.findAllByStatusIsNot(any())).thenReturn(reservations);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminGetAllReservation();
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(AppConstant.ReservationStatus.ACTIVE, ((List<ReservationRequest>) apiResponse.getData()).get(0).getStatus());
+    }
+
+    @Test
+    void adminGetAllReservation_Error_Test() {
+        when(reservationRepository.findAllByStatusIsNot(any())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminGetAllReservation();
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+    @Test
+    void updateReservationStatus_Success_Test() {
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+
+        when(reservationRepository.findById(any())).thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.updateReservationStatus(
+                1L,
+                AppConstant.ReservationStatus.ACTIVE);
+
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(AppConstant.ReservationStatus.ACTIVE, ((ReservationRequest) apiResponse.getData()).getStatus());
+    }
+
+    @Test
+    void updateReservationStatus_ReservationEmpty_Test() {
+
+        when(reservationRepository.findById(any())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reservationService.updateReservationStatus(
+                1L,
+                AppConstant.ReservationStatus.ACTIVE);
+
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateReservationStatus_Error_Test() {
+
+        when(reservationRepository.findById(any())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reservationService.updateReservationStatus(
+                1L,
+                AppConstant.ReservationStatus.ACTIVE);
+
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void adminAddReservation_Success_Test() {
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.of(floor));
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminAddReservation(
+                1L,
+                request,
+                1L);
+
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(AppConstant.ReservationStatus.ACTIVE, ((ReservationRequest) apiResponse.getData()).getStatus());
+    }
+
+    @Test
+    void adminAddReservation_ReservationEmpty_Test() {
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reservationService.adminAddReservation(
+                1L,
+                request,
+                1L);
+
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void adminAddReservation_FloorEmpty_Test() {
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reservationService.adminAddReservation(
+                1L,
+                request,
+                1L);
+
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+    @Test
+    void adminAddReservation_Error_Test() {
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+
+        when(reservationRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reservationService.adminAddReservation(
+                1L,
+                request,
+                1L);
+
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void userCancelReservation_Success_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@email.com")
+                .build();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.WAITING)
+                .floor(floor)
+                .user(user)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.WAITING)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+
+        when(userRepository.findUserByEmail(any())).thenReturn(Optional.of(user));
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(AppConstant.ReservationStatus.WAITING, ((ReservationRequest) apiResponse.getData()).getStatus());
+    }
+
+    @Test
+    void userCancelReservation_UserEmpty_Test() {
+
+        when(userRepository.findUserByEmail(any())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void userCancelReservation_ReservationEmpty_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@email.com")
+                .build();
+
+        when(userRepository.findUserByEmail(any())).thenReturn(Optional.of(user));
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void userCancelReservation_DifferentUser_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@email.com")
+                .build();
+        User user1 = User.builder()
+                .id(1L)
+                .email("another-email@email.com")
+                .build();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.WAITING)
+                .floor(floor)
+                .user(user)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.WAITING)
+                .build();
+
+        when(userRepository.findUserByEmail(any())).thenReturn(Optional.of(user1));
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void userCancelReservation_WrongStatus_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@email.com")
+                .build();
+        Building building = Building.builder().build();
+        Floor floor = Floor.builder()
+                .building(building)
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .floor(floor)
+                .user(user)
+                .build();
+        ReservationRequest request = ReservationRequest.builder()
+                .id(1L)
+                .status(AppConstant.ReservationStatus.ACTIVE)
+                .build();
+        BuildingRequest buildingRequest =  BuildingRequest.builder()
+                .id(1L)
+                .build();
+
+        when(userRepository.findUserByEmail(any())).thenReturn(Optional.of(user));
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(buildingRequest);
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void userCancelReservation_Error_Test() {
+
+        when(userRepository.findUserByEmail(any())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reservationService.userCancelReservation(1L,"email");
+
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
 }
