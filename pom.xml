@@ -151,6 +151,7 @@
 						<exclude>**/BookingApplication.class</exclude>
 						<exclude>**/config/**</exclude>
 						<exclude>**/controller/**</exclude>
+						<exclude>**/resolver/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
