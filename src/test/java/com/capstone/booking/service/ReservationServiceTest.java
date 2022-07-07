@@ -9,6 +9,7 @@ import com.capstone.booking.domain.dao.User;
 import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.domain.dto.ReservationRequest;
+import com.capstone.booking.domain.dto.ReservationUserRequest;
 import com.capstone.booking.repository.FloorRepository;
 import com.capstone.booking.repository.ReservationRepository;
 import com.capstone.booking.repository.UserRepository;
@@ -138,6 +139,8 @@ class ReservationServiceTest {
                 .id(1L)
                 .status(AppConstant.ReservationStatus.WAITING)
                 .build();
+        ReservationUserRequest userRequest = ReservationUserRequest.builder()
+                .build();
 
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
         when(floorRepository.findById(anyLong())).thenReturn(Optional.of(floor));
@@ -145,7 +148,7 @@ class ReservationServiceTest {
         when(reservationRepository.save(any())).thenReturn(reservation);
         when(modelMapper.map(any(), eq(ReservationRequest.class))).thenReturn(request);
 
-        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(request, 1L, "email");
+        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(userRequest, 1L, "email");
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -154,14 +157,12 @@ class ReservationServiceTest {
 
     @Test
     void userAddReservation_UserEmpty_Test() {
-        ReservationRequest request = ReservationRequest.builder()
-                .id(1L)
-                .status(AppConstant.ReservationStatus.WAITING)
-                .build();
 
+        ReservationUserRequest userRequest = ReservationUserRequest.builder()
+                .build();
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(request, 1L, "email");
+        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(userRequest, 1L, "email");
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -172,15 +173,13 @@ class ReservationServiceTest {
                 .id(1L)
                 .email("some-email@email.com")
                 .build();
-        ReservationRequest request = ReservationRequest.builder()
-                .id(1L)
-                .status(AppConstant.ReservationStatus.WAITING)
+        ReservationUserRequest userRequest = ReservationUserRequest.builder()
                 .build();
 
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
         when(floorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(request, 1L, "email");
+        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(userRequest, 1L, "email");
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -188,14 +187,12 @@ class ReservationServiceTest {
     @Test
     void userAddReservation_Error_Test() {
 
-        ReservationRequest request = ReservationRequest.builder()
-                .id(1L)
-                .status(AppConstant.ReservationStatus.WAITING)
+        ReservationUserRequest userRequest = ReservationUserRequest.builder()
                 .build();
 
         when(userRepository.findUserByEmail(anyString())).thenThrow(NullPointerException.class);
 
-        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(request, 1L, "email");
+        ResponseEntity<Object> responseEntity = reservationService.userAddReservation(userRequest, 1L, "email");
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }

@@ -21,6 +21,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
     Optional<Review> findByUserIdAndBuildingId(Long userId, Long buildingId);
     List<Review> findAllByIsApprovedIsNull();
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.building.id = ?1")
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.building.id = ?1 AND r.isApproved = TRUE")
     Double averageOfBuildingReviewRating(Long buildingId);
 }
