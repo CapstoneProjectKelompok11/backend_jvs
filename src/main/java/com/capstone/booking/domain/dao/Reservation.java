@@ -49,10 +49,13 @@ public class Reservation extends BaseDAO {
     @Column(nullable = false)
     private String phone;
 
+    private Integer participant;
+
     @Column(columnDefinition = "text")
     private String note;
 
     private String image;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

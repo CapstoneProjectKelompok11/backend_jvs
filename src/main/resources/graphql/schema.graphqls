@@ -1,0 +1,27 @@
+type Chat {
+    id: ID!
+    message: String!
+    sender: User!
+    receiver: User!
+    timestamp: String!
+}
+type User {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    email: String!
+}
+
+type Mutation {
+    sendMessage(input: ChatForm!): Chat!
+}
+type Query {
+    getChatByUser(userId: Int!): [Chat]
+    getChatForAdmin(userId: Int!): [Chat]
+}
+
+input ChatForm {
+    sender: Int!
+    receiver: Int!
+    message: String!
+}

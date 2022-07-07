@@ -32,6 +32,7 @@ public class SecurityConfiguration {
         http.headers().frameOptions().disable();
         http.authorizeRequests().antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/auth/**").hasRole("USER")
+                .antMatchers("/graphql").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/**").permitAll();
 
         //remove session
