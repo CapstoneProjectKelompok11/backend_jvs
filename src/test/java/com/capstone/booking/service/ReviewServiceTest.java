@@ -72,12 +72,12 @@ class ReviewServiceTest {
         ResponseEntity<Object> responseEntity = reviewService.getReviewByBuildingId(1L, 0,1);
         ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
 
-        Page<ReviewRequest> result = ((Page<ReviewRequest>) apiResponse.getData());
+        List<ReviewRequest> result = ((List<ReviewRequest>) apiResponse.getData());
 
         assertNotNull(apiResponse);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("this is review", result.getContent().get(0).getReview());
-        assertEquals(5, result.getContent().get(0).getRating());
+        assertEquals("this is review", result.get(0).getReview());
+        assertEquals(5, result.get(0).getRating());
     }
 
     @Test
