@@ -4,6 +4,7 @@ import com.capstone.booking.domain.common.ApiResponse;
 import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.Review;
 import com.capstone.booking.domain.dao.User;
+import com.capstone.booking.domain.dto.ReviewAdminResponse;
 import com.capstone.booking.domain.dto.ReviewRequest;
 import com.capstone.booking.repository.BuildingRepository;
 import com.capstone.booking.repository.ReviewRepository;
@@ -182,5 +183,112 @@ class ReviewServiceTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
+    @Test
+    void getAllReviewForApproval_Success_Test() {
+        List<Review> reviews = new ArrayList<>();
+        Review review = Review.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+        reviews.add(review);
 
+        ReviewAdminResponse request = ReviewAdminResponse.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+
+
+        when(reviewRepository.findAllByIsApprovedIsNull()).thenReturn(reviews);
+        when(modelMapper.map(any(), eq(ReviewAdminResponse.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = reviewService.getAllReviewForApproval();
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<ReviewAdminResponse> result = ((List<ReviewAdminResponse>) apiResponse.getData());
+
+        assertNotNull(apiResponse);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("this is review", result.get(0).getReview());
+        assertEquals(5, result.get(0).getRating());
+    }
+
+    @Test
+    void getAllReviewForApproval_Error_Test() {
+        when(reviewRepository.findAllByIsApprovedIsNull()).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reviewService.getAllReviewForApproval();
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateApproval_Success_Test() {
+        List<Review> reviews = new ArrayList<>();
+        Review review = Review.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+        reviews.add(review);
+
+        ReviewAdminResponse request = ReviewAdminResponse.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+
+
+        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenReturn(Optional.of(review));
+        when(reviewRepository.save(any())).thenReturn(review);
+        when(modelMapper.map(any(), eq(ReviewAdminResponse.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = reviewService.updateApproval(1L, 1L, true);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        ReviewAdminResponse result = ((ReviewAdminResponse) apiResponse.getData());
+
+        assertNotNull(apiResponse);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("this is review", result.getReview());
+        assertEquals(5, result.getRating());
+    }
+
+    @Test
+    void updateApproval_ReviewEmpty_Test() {
+        List<Review> reviews = new ArrayList<>();
+        Review review = Review.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+        reviews.add(review);
+
+        ReviewAdminResponse request = ReviewAdminResponse.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+
+
+        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = reviewService.updateApproval(1L, 1L, true);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateApproval_Error_Test() {
+        List<Review> reviews = new ArrayList<>();
+        Review review = Review.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+        reviews.add(review);
+
+        ReviewAdminResponse request = ReviewAdminResponse.builder()
+                .review("this is review")
+                .rating(5)
+                .build();
+
+
+        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = reviewService.updateApproval(1L, 1L, true);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
 }

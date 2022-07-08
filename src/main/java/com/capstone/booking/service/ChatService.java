@@ -12,12 +12,16 @@ import com.capstone.booking.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,11 +39,12 @@ public class ChatService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ChatResponse sendChat(ChatRequest request) {
+    public ChatResponse sendChat(String receiver, String message) {
         log.info("Executing sending chat");
         try {
-            Optional<User> senderOptional = userRepository.findById(request.getSender());
-            Optional<User> receiverOptional = userRepository.findById(request.getReceiver());
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Optional<User> senderOptional = userRepository.findUserByEmail(email);
+            Optional<User> receiverOptional = userRepository.findUserByEmail(receiver);
             if(senderOptional.isEmpty()||receiverOptional.isEmpty()){
                 log.info("User data not found, Sender found : {}, Receiver found: {}",
                         senderOptional.isPresent(),
@@ -61,7 +66,7 @@ public class ChatService {
             Chat chat = Chat.builder()
                     .sender(senderOptional.get())
                     .receiver(receiverOptional.get())
-                    .message(request.getMessage())
+                    .message(message)
                     .timestamp(LocalDateTime.now())
                     .build();
 
@@ -73,10 +78,11 @@ public class ChatService {
         }
     }
 
-    public List<ChatResponse> getChatByUserId(Long userId) {
+    public List<ChatResponse> getChatByUser() {
         log.info("Executing Getting chat history");
         try {
-            List<Chat> chats = chatRepository.findAllBySenderIdOrReceiverId(userId,userId);
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            List<Chat> chats = chatRepository.findAllBySenderEmailOrReceiverEmail(email, email);
             List<ChatResponse> chatResponses = new ArrayList<>();
             for (Chat chat :
                     chats) {
@@ -90,10 +96,24 @@ public class ChatService {
         }
     }
 
-    public List<ChatResponse> getChatByAdminWithUser(Long userId) {
+    public List<ChatResponse> getChatByAdminWithUser(String userEmail) {
         log.info("Executing Getting chat history for Admin");
         try {
-            List<Chat> chats = chatRepository.findAllBySenderIdOrReceiverId(userId ,userId);
+            Optional<User> userOptional = userRepository.findUserByEmail(userEmail);
+            if(userOptional.isEmpty()){
+                log.info("User data not found");
+                throw new IllegalArgumentException("User Not Found");
+            }
+            Optional<Role> roleOptional = roleRepository.findByName(AppConstant.RoleType.ROLE_ADMIN);
+            if(roleOptional.isEmpty()) {
+                log.info("Role Not Found");
+                throw new IllegalArgumentException("Role Not Found");
+            }
+            if(userOptional.get().getRoles().contains(roleOptional.get())){
+                log.info("This is not a user's email");
+                throw new IllegalArgumentException("Not a User");
+            }
+            List<Chat> chats = chatRepository.findAllBySenderEmailOrReceiverEmail(userEmail ,userEmail);
             List<ChatResponse> chatResponses = new ArrayList<>();
             for (Chat chat :
                     chats) {
