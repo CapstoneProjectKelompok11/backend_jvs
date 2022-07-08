@@ -42,7 +42,7 @@ public class ReservationController {
         }
     }
 
-    @PostMapping(value = "/auth/reservation/image", consumes = "multipart/form-data")
+    @PostMapping(value = "/auth/reservation/payment", consumes = "multipart/form-data")
     public ResponseEntity<Object> addImage(@RequestParam ("reservationId") Long reservationId,
                                            @RequestPart ("image") MultipartFile file,
                                            Principal principal) throws IOException {

@@ -2,7 +2,6 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.domain.common.ApiResponse;
 import com.capstone.booking.domain.dao.Building;
-import com.capstone.booking.domain.dao.BuildingImage;
 import com.capstone.booking.domain.dao.Floor;
 import com.capstone.booking.domain.dto.FloorRequest;
 import com.capstone.booking.repository.BuildingRepository;
@@ -28,9 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = FloorService.class)
@@ -291,6 +291,109 @@ class FloorServiceTest {
     }
 
     @Test
-    void getImage() {
+    void updateFloor_Success_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        Floor floor = Floor.builder()
+                .id(1L)
+                .name("Lantai 1")
+                .maxCapacity(10)
+                .startingPrice(400000)
+                .size("800x800 m2")
+                .build();
+
+        FloorRequest floorRequest = FloorRequest.builder()
+                .id(1L)
+                .name("Lantai 1")
+                .maxCapacity(10)
+                .startingPrice(400000)
+                .floorSize("800x800 m2")
+                .build();
+
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.of(floor));
+        when(floorRepository.save(any())).thenReturn(floor);
+        when(modelMapper.map(any(), eq(FloorRequest.class))).thenReturn(floorRequest);
+
+        ResponseEntity<Object> responseEntity = floorService.updateFloor(1L, floorRequest);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertNotNull(apiResponse);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Lantai 1", ((FloorRequest) apiResponse.getData()).getName());
+        assertEquals(10 , ((FloorRequest) apiResponse.getData()).getMaxCapacity());
+        assertEquals(400000, ((FloorRequest) apiResponse.getData()).getStartingPrice());
+        assertEquals("800x800 m2", ((FloorRequest) apiResponse.getData()).getFloorSize());
     }
+
+    @Test
+    void updateFloor_FloorEmpty_Test() {
+        FloorRequest floorRequest = FloorRequest.builder()
+                .id(1L)
+                .name("Lantai 1")
+                .maxCapacity(10)
+                .startingPrice(400000)
+                .floorSize("800x800 m2")
+                .build();
+
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = floorService.updateFloor(1L, floorRequest);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateFloor_Error_Test() {
+
+        FloorRequest floorRequest = FloorRequest.builder()
+                .id(1L)
+                .name("Lantai 1")
+                .maxCapacity(10)
+                .startingPrice(400000)
+                .floorSize("800x800 m2")
+                .build();
+
+        when(floorRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = floorService.updateFloor(1L, floorRequest);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteFloor_Success_Test() {
+        Floor floor = Floor.builder()
+                .id(1L)
+                .name("Lantai 1")
+                .maxCapacity(10)
+                .startingPrice(400000)
+                .size("800x800 m2")
+                .build();
+
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.of(floor));
+        doNothing().when(floorRepository).delete(any());
+
+        ResponseEntity<Object> responseEntity = floorService.deleteFloor(1L);
+        verify(floorRepository, times(1)).delete(any());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteFloor_FloorEmpty_Test() {
+        when(floorRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = floorService.deleteFloor(1L);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteFloor_Error_Test() {
+        when(floorRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = floorService.deleteFloor(1L);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
 }
