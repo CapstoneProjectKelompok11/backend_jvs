@@ -13,15 +13,10 @@ type User {
 }
 
 type Mutation {
-    sendMessage(input: ChatForm!): Chat!
+    sendMessage(receiver: String!, message: String!): Chat!
 }
 type Query {
-    getChatByUser(userId: Int!): [Chat]
-    getChatForAdmin(userId: Int!): [Chat]
+    getChatByUser: [Chat]
+    getChatForAdmin(userEmail: String!): [Chat]
 }
 
-input ChatForm {
-    sender: Int!
-    receiver: Int!
-    message: String!
-}

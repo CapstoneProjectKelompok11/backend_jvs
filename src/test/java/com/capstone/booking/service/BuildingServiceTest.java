@@ -38,7 +38,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = BuildingService.class)
@@ -547,6 +548,106 @@ class BuildingServiceTest {
         when(buildingRepository.findById(anyLong())).thenThrow(NullPointerException.class);
 
         ResponseEntity<Object> responseEntity = buildingService.addImage(1L, file);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateBuilding_Success_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
+        when(buildingRepository.save(any())).thenReturn(building);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+
+        ResponseEntity<Object> responseEntity = buildingService.updateBuilding(1L, request);
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", ((BuildingRequest) apiResponse.getData()).getName());
+        assertEquals("Jalan A", ((BuildingRequest) apiResponse.getData()).getAddress());
+        assertEquals(100, ((BuildingRequest) apiResponse.getData()).getCapacity());
+    }
+
+    @Test
+    void updateBuilding_BuildingEmpty_Test() {
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = buildingService.updateBuilding(1L, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void updateBuilding_Error_Test() {
+
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = buildingService.updateBuilding(1L, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteBuilding_Success_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
+        doNothing().when(buildingRepository).delete(any());
+
+        ResponseEntity<Object> responseEntity = buildingService.deleteBuilding(1L);
+
+        verify(buildingRepository, times(1)).delete(any());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteBuilding_BuildingEmpty_Test() {
+
+        when(buildingRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = buildingService.deleteBuilding(1L);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void deleteBuilding_Error_Test() {
+
+        when(buildingRepository.findById(anyLong())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = buildingService.deleteBuilding(1L);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }

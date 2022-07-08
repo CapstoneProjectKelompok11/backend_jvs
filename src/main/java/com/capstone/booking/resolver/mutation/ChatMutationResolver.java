@@ -7,6 +7,7 @@ import com.capstone.booking.service.ChatService;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,8 +18,9 @@ public class ChatMutationResolver implements GraphQLMutationResolver {
     @Autowired
     private ChatService chatService;
 
-    public ChatResponse sendMessage(ChatRequest request) {
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public ChatResponse sendMessage(String receiver, String message) {
         log.info("Executing send chat mutation");
-        return chatService.sendChat(request);
+        return chatService.sendChat(receiver,message);
     }
 }

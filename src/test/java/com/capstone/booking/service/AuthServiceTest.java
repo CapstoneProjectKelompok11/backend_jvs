@@ -12,20 +12,26 @@ import com.capstone.booking.domain.payload.EmailPassword;
 import com.capstone.booking.domain.payload.TokenResponse;
 import com.capstone.booking.repository.RoleRepository;
 import com.capstone.booking.repository.UserRepository;
+import com.capstone.booking.util.FileUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -164,6 +170,144 @@ class AuthServiceTest {
         String code = ((ApiResponseStatus) apiResponse.getStatus()).getCode();
 
         assertEquals("UNKNOWN_ERROR", code);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void getProfile_Success_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+        when(modelMapper.map(any(), eq(RegisterResponse.class))).thenReturn(registerResponse);
+
+        ResponseEntity responseEntity = authService.getProfile("email");
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("some-email@gmail.com", ((RegisterResponse) apiResponse.getData()).getEmail());
+    }
+
+    @Test
+    void getProfile_UserEmpty_Test() {
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
+
+        ResponseEntity responseEntity = authService.getProfile("email");
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void getProfile_Error_Test() {
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        when(userRepository.findUserByEmail(anyString())).thenThrow(NullPointerException.class);
+
+        ResponseEntity responseEntity = authService.getProfile("email");
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void addProfilePicture_Success_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        MockMultipartFile file = new MockMultipartFile(
+                "name",
+                "some_original_filename",
+                MediaType.TEXT_PLAIN_VALUE,
+                "think of this as image".getBytes());
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+
+        try (MockedStatic<FileUtil> utilities = Mockito.mockStatic(FileUtil.class)) {
+            utilities.when(() -> FileUtil.upload(anyString(), any(MultipartFile.class))).thenReturn("some_file_name");
+            when(userRepository.save(any())).thenReturn(user);
+            when(modelMapper.map(any(), eq(RegisterResponse.class))).thenReturn(registerResponse);
+
+            ResponseEntity<Object> responseEntity = authService.addProfilePicture(file, "some-email@email.com");
+
+            ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        }
+    }
+
+    @Test
+    void addProfilePicture_UserEmpty_Test() {
+        MockMultipartFile file = new MockMultipartFile(
+                "name",
+                "some_original_filename",
+                MediaType.TEXT_PLAIN_VALUE,
+                "think of this as image".getBytes());
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = authService.addProfilePicture(file, "some-email@email.com");
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+    @Test
+    void addProfilePicture_UploadFailed_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        MockMultipartFile file = new MockMultipartFile(
+                "name",
+                "some_original_filename",
+                MediaType.TEXT_PLAIN_VALUE,
+                "think of this as image".getBytes());
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+
+        try (MockedStatic<FileUtil> utilities = Mockito.mockStatic(FileUtil.class)) {
+            utilities.when(() -> FileUtil.upload(anyString(), any(MultipartFile.class))).thenReturn(null);
+
+            ResponseEntity<Object> responseEntity = authService.addProfilePicture(file, "some-email@email.com");
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        }
+    }
+
+    @Test
+    void addProfilePicture_Error_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        MockMultipartFile file = new MockMultipartFile(
+                "name",
+                "some_original_filename",
+                MediaType.TEXT_PLAIN_VALUE,
+                "think of this as image".getBytes());
+
+        when(userRepository.findUserByEmail(anyString())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = authService.addProfilePicture(file, "some-email@email.com");
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 }
