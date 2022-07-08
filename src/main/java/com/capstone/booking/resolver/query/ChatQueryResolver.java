@@ -5,6 +5,7 @@ import com.capstone.booking.service.ChatService;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,13 +17,15 @@ public class ChatQueryResolver implements GraphQLQueryResolver {
     @Autowired
     private ChatService chatService;
 
-    public List<ChatResponse> getChatByUser(Long userId) {
+    @PreAuthorize("hasRole('USER')")
+    public List<ChatResponse> getChatByUser() {
         log.info("Executing get chat query");
-        return chatService.getChatByUserId(userId);
+        return chatService.getChatByUser();
     }
 
-    public List<ChatResponse> getChatForAdmin(Long userId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ChatResponse> getChatForAdmin(String userEmail) {
         log.info("Executing get chat for admin query");
-        return chatService.getChatByAdminWithUser(userId);
+        return chatService.getChatByAdminWithUser(userEmail);
     }
 }

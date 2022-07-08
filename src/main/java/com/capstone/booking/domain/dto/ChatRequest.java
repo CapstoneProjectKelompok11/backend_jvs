@@ -19,8 +19,6 @@ public class ChatRequest {
 
     private Long id;
 
-    private Long sender;
-
     private Long receiver;
 
     private String message;
