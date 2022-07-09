@@ -1,6 +1,5 @@
 package com.capstone.booking.resolver.mutation;
 
-import com.capstone.booking.domain.dto.ChatRequest;
 import com.capstone.booking.domain.dto.ChatResponse;
 import com.capstone.booking.service.ChatService;
 
@@ -18,9 +17,15 @@ public class ChatMutationResolver implements GraphQLMutationResolver {
     @Autowired
     private ChatService chatService;
 
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ChatResponse sendMessage(String receiver, String message) {
+    @PreAuthorize("hasRole('USER')")
+    public ChatResponse userSendMessage(String message, Long buildingId) {
         log.info("Executing send chat mutation");
-        return chatService.sendChat(receiver,message);
+        return chatService.userSendChat(message, buildingId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public ChatResponse adminSendMessage(String receiver, String message, Long buildingId) {
+        log.info("Executing send chat mutation");
+        return chatService.adminSendChat(receiver,message, buildingId);
     }
 }

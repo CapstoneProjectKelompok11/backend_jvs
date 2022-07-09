@@ -22,9 +22,9 @@ import java.time.LocalDateTime;
 public class ChatResponse {
     private Long id;
 
-    private User sender;
+    private User user;
 
-    private User receiver;
+    private Boolean sentByUser;
 
     private String message;
 

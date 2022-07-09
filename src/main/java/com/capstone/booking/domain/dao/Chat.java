@@ -17,15 +17,17 @@ public class Chat {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "senderId")
-    private User sender;
+    @JoinColumn(name = "buildingId")
+    private Building building;
 
     @ManyToOne
-    @JoinColumn(name = "receiverId")
-    private User receiver;
+    @JoinColumn(name = "senderId")
+    private User user;
 
     @Column(columnDefinition = "text")
     private String message;
+
+    private Boolean sentByUser;
 
     private LocalDateTime timestamp;
 }
