@@ -55,6 +55,10 @@ public class Building extends BaseDAO {
     @OneToMany(mappedBy = "building")
     private List<Floor> floors;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "building")
+    private List<Chat> chats;
+
     @OneToMany(mappedBy = "building")
     private List<BuildingImage> images;
 

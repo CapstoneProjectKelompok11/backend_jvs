@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -177,4 +178,39 @@ public class AuthService {
             );
         }
     }
+
+    public ResponseEntity<Object> editProfile(RegisterResponse request, String email) {
+        log.info("Executing update profile");
+        try {
+            Optional<User> userOptional = userRepository.findUserByEmail(email);
+            if(userOptional.isEmpty()) {
+                log.info("User with Email [{}] not found ", email);
+                return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND,
+                        null,
+                        HttpStatus.BAD_REQUEST);
+            }
+            if((!Objects.equals(email, request.getEmail())) && userRepository.existsByEmail(request.getEmail())) {
+                log.info("An Account with this email already exist");
+                return ResponseUtil.build(AppConstant.ResponseCode.EMAIL_ALREADY_EXIST, null, HttpStatus.BAD_REQUEST);
+            }
+            User user = userOptional.get();
+            user.setFirstName(request.getFirstName());
+            user.setLastName(request.getLastName());
+            user.setEmail(request.getEmail());
+            user.setPhone(request.getPhone());
+            userRepository.save(user);
+
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    modelMapper.map(user, RegisterResponse.class),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error occured while trying to edit profile. Error : {}", e.getMessage());
+            return ResponseUtil.build(
+                    AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
 }

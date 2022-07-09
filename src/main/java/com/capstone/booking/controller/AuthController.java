@@ -2,6 +2,7 @@ package com.capstone.booking.controller;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.dto.RegisterRequest;
+import com.capstone.booking.domain.dto.RegisterResponse;
 import com.capstone.booking.domain.payload.EmailPassword;
 import com.capstone.booking.service.AuthService;
 import com.capstone.booking.util.ResponseUtil;
@@ -58,5 +59,14 @@ public class AuthController {
     @GetMapping(value = "/profile/image/{filename}", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<Object> showProfilePicture (@PathVariable String filename) {
         return authService.getImage(filename);
+    }
+
+    @PutMapping(value = "/auth/profile/edit")
+    public ResponseEntity<Object> editProfile(Principal principal, @RequestBody RegisterResponse response) {
+        if (principal != null){
+            return authService.editProfile(response, principal.getName());
+        } else {
+            return ResponseUtil.build(AppConstant.ResponseCode.NOT_LOGGED_IN, null, HttpStatus.FORBIDDEN);
+        }
     }
 }

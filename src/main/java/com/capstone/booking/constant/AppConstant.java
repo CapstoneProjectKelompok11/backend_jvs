@@ -20,6 +20,7 @@ public class AppConstant {
         NOT_LOGGED_IN("NOT_LOGGED_IN", "Login first to access this endpoint"),
         UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "You do not have permission to access this"),
 
+        EMAIL_ALREADY_EXIST("EMAIL_ALREADY_EXIST", "An account with this email already exist"),
         BAD_CREDENTIALS("BAD_CREDENTIALS", "Provided Credentials is wrong!");
 
         private final String code;

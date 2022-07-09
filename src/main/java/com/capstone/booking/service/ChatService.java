@@ -1,27 +1,24 @@
 package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
+import com.capstone.booking.domain.dao.Building;
 import com.capstone.booking.domain.dao.Chat;
 import com.capstone.booking.domain.dao.Role;
 import com.capstone.booking.domain.dao.User;
-import com.capstone.booking.domain.dto.ChatRequest;
+import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.ChatResponse;
-import com.capstone.booking.repository.ChatRepository;
-import com.capstone.booking.repository.RoleRepository;
-import com.capstone.booking.repository.UserRepository;
+import com.capstone.booking.repository.*;
+import com.capstone.booking.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -37,18 +34,60 @@ public class ChatService {
     private UserRepository userRepository;
 
     @Autowired
+    private FloorRepository floorRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private BuildingRepository buildingRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
-    public ChatResponse sendChat(String receiver, String message) {
+    public ChatResponse userSendChat(String message, Long buildingId) {
         log.info("Executing sending chat");
         try {
+            Optional<Building> building = buildingRepository.findById(buildingId);
+            if(building.isEmpty()) {
+                log.info("Building data not found");
+                throw new IllegalArgumentException("Building Not Found");
+            }
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             Optional<User> senderOptional = userRepository.findUserByEmail(email);
+            if(senderOptional.isEmpty()){
+                log.info("User data not found");
+                throw new IllegalArgumentException("User Not Found");
+            }
+
+            Chat chat = Chat.builder()
+                    .user(senderOptional.get())
+                    .sentByUser(true)
+                    .message(message)
+                    .building(building.get())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            chatRepository.save(chat);
+            return modelMapper.map(chat, ChatResponse.class);
+
+        } catch (Exception e) {
+            log.error("Error occurred while trying to send chat. Error : {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public ChatResponse adminSendChat(String receiver, String message, Long buildingId) {
+        log.info("Executing sending chat");
+        try {
+            Optional<Building> building = buildingRepository.findById(buildingId);
+            if(building.isEmpty()) {
+                log.info("Building data not found");
+                throw new IllegalArgumentException("Building Not Found");
+            }
             Optional<User> receiverOptional = userRepository.findUserByEmail(receiver);
-            if(senderOptional.isEmpty()||receiverOptional.isEmpty()){
-                log.info("User data not found, Sender found : {}, Receiver found: {}",
-                        senderOptional.isPresent(),
-                        receiverOptional.isPresent());
+            if(receiverOptional.isEmpty()){
+                log.info("User data not found");
                 throw new IllegalArgumentException("User Not Found");
             }
 
@@ -58,15 +97,16 @@ public class ChatService {
                 throw new IllegalArgumentException("Role Not Found");
             }
 
-            if(senderOptional.get().getRoles().contains(roleOptional.get()) == receiverOptional.get().getRoles().contains(roleOptional.get())){
+            if(receiverOptional.get().getRoles().contains(roleOptional.get())){
                 log.info("Chat is only available from admin to user and vice versa");
                 throw new UnsupportedOperationException("Admin can only chat to user and vice versa");
             }
 
             Chat chat = Chat.builder()
-                    .sender(senderOptional.get())
-                    .receiver(receiverOptional.get())
+                    .user(receiverOptional.get())
+                    .sentByUser(false)
                     .message(message)
+                    .building(building.get())
                     .timestamp(LocalDateTime.now())
                     .build();
 
@@ -78,11 +118,11 @@ public class ChatService {
         }
     }
 
-    public List<ChatResponse> getChatByUser() {
+    public List<ChatResponse> getChatByUser(Long buildingId) {
         log.info("Executing Getting chat history");
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            List<Chat> chats = chatRepository.findAllBySenderEmailOrReceiverEmail(email, email);
+            List<Chat> chats = chatRepository.findAllByUserEmailAndBuildingId(email, buildingId);
             List<ChatResponse> chatResponses = new ArrayList<>();
             for (Chat chat :
                     chats) {
@@ -96,7 +136,7 @@ public class ChatService {
         }
     }
 
-    public List<ChatResponse> getChatByAdminWithUser(String userEmail) {
+    public List<ChatResponse> getChatForAdmin(String userEmail, Long buildingId) {
         log.info("Executing Getting chat history for Admin");
         try {
             Optional<User> userOptional = userRepository.findUserByEmail(userEmail);
@@ -113,7 +153,7 @@ public class ChatService {
                 log.info("This is not a user's email");
                 throw new IllegalArgumentException("Not a User");
             }
-            List<Chat> chats = chatRepository.findAllBySenderEmailOrReceiverEmail(userEmail ,userEmail);
+            List<Chat> chats = chatRepository.findAllByUserEmailAndBuildingId(userEmail ,buildingId);
             List<ChatResponse> chatResponses = new ArrayList<>();
             for (Chat chat :
                     chats) {
@@ -124,6 +164,33 @@ public class ChatService {
         } catch (Exception e) {
             log.error("Error occurred while trying to get chat. Error : {}", e.getMessage());
             throw e;
+        }
+    }
+
+    public ResponseEntity<Object> showBuildingChatHistory(String email) {
+        log.info("Executing show all building in chat history");
+        try {
+            Set<Building> buildings = buildingRepository.findAllByChat(email);
+            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            for (Building building:
+                 buildings) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                request.setOfficeType(types);
+                request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
+                buildingRequests.add(request);
+            }
+            log.info("Successfully retrieved all Building in chat history");
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    buildingRequests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error occurred while trying to get building in chat history. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

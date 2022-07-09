@@ -18,14 +18,14 @@ public class ChatQueryResolver implements GraphQLQueryResolver {
     private ChatService chatService;
 
     @PreAuthorize("hasRole('USER')")
-    public List<ChatResponse> getChatByUser() {
+    public List<ChatResponse> getChatByUser(Long buildingId) {
         log.info("Executing get chat query");
-        return chatService.getChatByUser();
+        return chatService.getChatByUser(buildingId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ChatResponse> getChatForAdmin(String userEmail) {
+    public List<ChatResponse> getChatForAdmin(String userEmail, Long buildingId) {
         log.info("Executing get chat for admin query");
-        return chatService.getChatByAdminWithUser(userEmail);
+        return chatService.getChatForAdmin(userEmail, buildingId);
     }
 }
