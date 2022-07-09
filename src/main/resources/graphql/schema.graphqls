@@ -1,8 +1,8 @@
 type Chat {
     id: ID!
     message: String!
-    sender: User!
-    receiver: User!
+    user: User!
+    sentByUser: Boolean!
     timestamp: String!
 }
 type User {
@@ -10,13 +10,15 @@ type User {
     firstName: String!
     lastName: String!
     email: String!
+    image: String!
 }
 
 type Mutation {
-    sendMessage(receiver: String!, message: String!): Chat!
+    userSendMessage(message: String!, buildingId: Int!): Chat!
+    adminSendMessage(receiver: String, message: String!, buildingId: Int!): Chat!
 }
 type Query {
-    getChatByUser: [Chat]
-    getChatForAdmin(userEmail: String!): [Chat]
+    getChatByUser(buildingId: Int!): [Chat]
+    getChatForAdmin(userEmail: String!, buildingId: Int!): [Chat]
 }
 

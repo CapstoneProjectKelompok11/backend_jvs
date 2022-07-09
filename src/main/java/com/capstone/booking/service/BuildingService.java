@@ -189,6 +189,35 @@ public class BuildingService {
         }
     }
 
+    public ResponseEntity<Object> searchBuilding(String name) {
+        log.info("Executing search building");
+        try {
+            List<Building> buildings = buildingRepository.findAllByNameContainsIgnoreCase(name);
+            List<BuildingRequest> requests = new ArrayList<>();
+            for (Building building :
+                    buildings) {
+                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
+                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
+                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
+
+                int floorCount = floorRepository.countByBuilding_Id(building.getId());
+                request.setOfficeType(types);
+                request.setRating(Objects.requireNonNullElse(rating, 0.0));
+                request.setFloorCount(floorCount);
+                requests.add(request);
+            }
+            return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
+                    requests,
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("An error occurred while trying to get all building. Error : {}", e.getMessage());
+            return ResponseUtil.build(AppConstant.ResponseCode.UNKNOWN_ERROR,
+                    null,
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
     public ResponseEntity<Object> addNewBuilding(BuildingRequest req, Long complexId) {
@@ -226,15 +255,15 @@ public class BuildingService {
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);
             }
 
-            Building building = Building.builder()
-                    .name(request.getName())
-                    .address(request.getAddress())
-                    .description(request.getDescription())
-                    .capacity(request.getCapacity())
-                    .buildingSize(request.getBuildingSize())
-                    .facilities(request.getFacilities())
-                    .build();
+            Building building = buildingOptional.get();
+            building.setName(request.getName());
+            building.setAddress(request.getAddress());
+            building.setDescription(request.getDescription());
+            building.setCapacity(request.getCapacity());
+            building.setBuildingSize(request.getBuildingSize());
+            building.setFacilities(request.getFacilities());
             buildingRepository.save(building);
+
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
                     modelMapper.map(building, BuildingRequest.class),
                     HttpStatus.OK);
