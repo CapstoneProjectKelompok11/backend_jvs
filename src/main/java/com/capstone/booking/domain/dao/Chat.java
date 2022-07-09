@@ -29,5 +29,7 @@ public class Chat {
 
     private Boolean sentByUser;
 
+//    private Boolean isRead;
+
     private LocalDateTime timestamp;
 }

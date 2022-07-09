@@ -7,6 +7,7 @@ import com.capstone.booking.domain.dao.Role;
 import com.capstone.booking.domain.dao.User;
 import com.capstone.booking.domain.dto.BuildingRequest;
 import com.capstone.booking.domain.dto.ChatResponse;
+import com.capstone.booking.domain.dto.InboxBuildingResponse;
 import com.capstone.booking.repository.*;
 import com.capstone.booking.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -171,17 +172,19 @@ public class ChatService {
         log.info("Executing show all building in chat history");
         try {
             Set<Building> buildings = buildingRepository.findAllByChat(email);
-            List<BuildingRequest> buildingRequests = new ArrayList<>();
+            List<InboxBuildingResponse> buildingRequests = new ArrayList<>();
             for (Building building:
                  buildings) {
-                Set<String> types = floorRepository.findDistinctTypeByBuildingId(building.getId());
-                Double rating = reviewRepository.averageOfBuildingReviewRating(building.getId());
-                BuildingRequest request = modelMapper.map(building, BuildingRequest.class);
-                int floorCount = floorRepository.countByBuilding_Id(building.getId());
-                request.setOfficeType(types);
-                request.setRating(Objects.requireNonNullElse(rating, 0.0));
-                request.setFloorCount(floorCount);
-                buildingRequests.add(request);
+                List<ChatResponse> chats = getChatByUser(building.getId());
+                ChatResponse latestChat = chats.get(chats.size()-1) ;
+                InboxBuildingResponse inbox = InboxBuildingResponse.builder()
+                        .id(building.getId())
+                        .buildingName(building.getName())
+                        .buildingImages(building.getImages().get(0).getFileName())
+                        .latestMessage(latestChat.getMessage())
+                        .latestMessageTimestamp(latestChat.getTimestamp())
+                        .build();
+                buildingRequests.add(inbox);
             }
             log.info("Successfully retrieved all Building in chat history");
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS,
