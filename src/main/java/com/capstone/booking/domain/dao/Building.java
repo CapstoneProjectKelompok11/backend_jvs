@@ -66,6 +66,8 @@ public class Building extends BaseDAO {
     @OneToMany(mappedBy = "building")
     private List<Review> reviews;
 
-
+    @JsonIgnore
+    @OneToMany(mappedBy = "building")
+    private List<Favorite> favorites;
 
 }

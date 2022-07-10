@@ -198,7 +198,7 @@ class ReviewServiceTest {
                 .build();
 
 
-        when(reviewRepository.findAllByIsApprovedIsNull()).thenReturn(reviews);
+        when(reviewRepository.findAllByIsApprovedIsNullAndBuildingIsDeletedFalse()).thenReturn(reviews);
         when(modelMapper.map(any(), eq(ReviewAdminResponse.class))).thenReturn(request);
 
         ResponseEntity<Object> responseEntity = reviewService.getAllReviewForApproval();
@@ -214,7 +214,7 @@ class ReviewServiceTest {
 
     @Test
     void getAllReviewForApproval_Error_Test() {
-        when(reviewRepository.findAllByIsApprovedIsNull()).thenThrow(NullPointerException.class);
+        when(reviewRepository.findAllByIsApprovedIsNullAndBuildingIsDeletedFalse()).thenThrow(NullPointerException.class);
 
         ResponseEntity<Object> responseEntity = reviewService.getAllReviewForApproval();
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
@@ -235,7 +235,7 @@ class ReviewServiceTest {
                 .build();
 
 
-        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenReturn(Optional.of(review));
+        when(reviewRepository.findByUserIdAndBuildingIdAndBuildingIsDeletedFalse(anyLong(), anyLong())).thenReturn(Optional.of(review));
         when(reviewRepository.save(any())).thenReturn(review);
         when(modelMapper.map(any(), eq(ReviewAdminResponse.class))).thenReturn(request);
 
@@ -265,7 +265,7 @@ class ReviewServiceTest {
                 .build();
 
 
-        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenReturn(Optional.empty());
+        when(reviewRepository.findByUserIdAndBuildingIdAndBuildingIsDeletedFalse(anyLong(), anyLong())).thenReturn(Optional.empty());
 
         ResponseEntity<Object> responseEntity = reviewService.updateApproval(1L, 1L, true);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
@@ -286,7 +286,7 @@ class ReviewServiceTest {
                 .build();
 
 
-        when(reviewRepository.findByUserIdAndBuildingId(anyLong(), anyLong())).thenThrow(NullPointerException.class);
+        when(reviewRepository.findByUserIdAndBuildingIdAndBuildingIsDeletedFalse(anyLong(), anyLong())).thenThrow(NullPointerException.class);
 
         ResponseEntity<Object> responseEntity = reviewService.updateApproval(1L, 1L, true);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());

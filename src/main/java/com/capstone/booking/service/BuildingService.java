@@ -2,10 +2,9 @@ package com.capstone.booking.service;
 
 import com.capstone.booking.constant.AppConstant;
 import com.capstone.booking.domain.common.SearchSpecification;
-import com.capstone.booking.domain.dao.Building;
-import com.capstone.booking.domain.dao.BuildingImage;
-import com.capstone.booking.domain.dao.Complex;
+import com.capstone.booking.domain.dao.*;
 import com.capstone.booking.domain.dto.BuildingRequest;
+import com.capstone.booking.domain.dto.FavoriteResponse;
 import com.capstone.booking.domain.dto.SearchRequest;
 import com.capstone.booking.repository.*;
 import com.capstone.booking.util.ResponseUtil;
@@ -326,6 +325,5 @@ public class BuildingService {
     public ResponseEntity<Object> getImage(String filename) {
         return FileUtil.getFileContent(path, filename);
     }
-
 
 }
