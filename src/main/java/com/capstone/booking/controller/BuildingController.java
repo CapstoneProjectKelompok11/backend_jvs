@@ -36,6 +36,7 @@ public class BuildingController {
         return buildingService.getBuildingById(id);
     }
 
+
     @GetMapping("/building/search")
     public ResponseEntity<Object> searchBuilding(@RequestParam (required = false, value = "name") String name) {
         if(name == null){
