@@ -71,7 +71,7 @@ public class ReviewService {
     public ResponseEntity<Object> getAllReviewForApproval () {
         log.info("Executing get all Review with null isApproved value");
         try {
-            List<Review> reviews = reviewRepository.findAllByIsApprovedIsNull();
+            List<Review> reviews = reviewRepository.findAllByIsApprovedIsNullAndBuildingIsDeletedFalse();
             List<ReviewAdminResponse> reviewRequests = new ArrayList<>();
             for (Review review :
                     reviews) {
@@ -96,7 +96,7 @@ public class ReviewService {
     public ResponseEntity<Object> updateApproval(Long userId, Long buildingId, Boolean approved) {
         log.info("Updating the approval of review from user ID : [{}] to building ID [{}]", userId, buildingId);
         try {
-            Optional<Review> reviewOptional = reviewRepository.findByUserIdAndBuildingId(userId, buildingId);
+            Optional<Review> reviewOptional = reviewRepository.findByUserIdAndBuildingIdAndBuildingIsDeletedFalse(userId, buildingId);
             if (reviewOptional.isEmpty()) {
                 log.info("Review from user ID : [{}] to building ID : [{}] not found ", userId, buildingId);
                 return ResponseUtil.build(AppConstant.ResponseCode.DATA_NOT_FOUND, null, HttpStatus.BAD_REQUEST);

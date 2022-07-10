@@ -22,4 +22,7 @@ public interface BuildingRepository extends JpaRepository<Building, Long>,
     Set<Building> findAllByChat(String email);
 
     List<Building> findAllByNameContainsIgnoreCase(String name);
+
+    @Query("SELECT b FROM Building b JOIN Favorite f WHERE f.user.email = ?1 AND f.building.id = b.id")
+    List<Building> findAllByUserFavorites(String email);
 }

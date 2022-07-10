@@ -15,12 +15,12 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecificationExecutor<Review> {
 
-    @Query("SELECT r FROM Review r WHERE r.building.id = ?1 AND r.isApproved = TRUE ")
+    @Query("SELECT r FROM Review r WHERE r.building.id = ?1 AND r.isApproved = TRUE AND r.building.isDeleted = FALSE ")
     Page<Review> findAllByBuildingId(Long buildingId, Pageable pageable);
 
-    Optional<Review> findByUserIdAndBuildingId(Long userId, Long buildingId);
-    List<Review> findAllByIsApprovedIsNull();
+    Optional<Review> findByUserIdAndBuildingIdAndBuildingIsDeletedFalse(Long userId, Long buildingId);
+    List<Review> findAllByIsApprovedIsNullAndBuildingIsDeletedFalse();
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.building.id = ?1 AND r.isApproved = TRUE")
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.building.id = ?1 AND r.isApproved = TRUE AND r.building.isDeleted = FALSE")
     Double averageOfBuildingReviewRating(Long buildingId);
 }
