@@ -63,7 +63,7 @@ public class FavoriteService {
     }
 
     public ResponseEntity<Object> unFavorite(String email, Long buildingId) {
-        log.info("Unfavoriting a building");
+        log.info("Favouring a building");
         try {
             Optional<Favorite> favoriteOptional = favoriteRepository.findFavorite(email, buildingId);
             if(favoriteOptional.isEmpty()) {

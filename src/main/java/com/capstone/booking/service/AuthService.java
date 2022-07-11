@@ -189,10 +189,12 @@ public class AuthService {
                         null,
                         HttpStatus.BAD_REQUEST);
             }
+
             if((!Objects.equals(email, request.getEmail())) && userRepository.existsByEmail(request.getEmail())) {
                 log.info("An Account with this email already exist");
                 return ResponseUtil.build(AppConstant.ResponseCode.EMAIL_ALREADY_EXIST, null, HttpStatus.BAD_REQUEST);
             }
+
             User user = userOptional.get();
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());

@@ -310,4 +310,78 @@ class AuthServiceTest {
         ResponseEntity<Object> responseEntity = authService.addProfilePicture(file, "some-email@email.com");
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
+
+    @Test
+    void editProfile_Success_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.save(any())).thenReturn(user);
+        when(modelMapper.map(any(), eq(RegisterResponse.class))).thenReturn(registerResponse);
+
+        ResponseEntity<Object> responseEntity = authService.editProfile(registerResponse, "some-email@gmail.com");
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("some-email@gmail.com", ((RegisterResponse) apiResponse.getData()).getEmail());
+    }
+
+    @Test
+    void editProfile_UserEmpty_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> responseEntity = authService.editProfile(registerResponse, "some-email@gmail.com");
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void editProfile_EmailExist_Test() {
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
+
+        ResponseEntity<Object> responseEntity = authService.editProfile(registerResponse, "new-email@gmail.com");
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void editProfile_Error_Test() {
+        RegisterResponse registerResponse = RegisterResponse.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+
+        when(userRepository.findUserByEmail(anyString())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = authService.editProfile(registerResponse, "some-email@gmail.com");
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
 }

@@ -35,12 +35,6 @@ public class ChatService {
     private UserRepository userRepository;
 
     @Autowired
-    private FloorRepository floorRepository;
-
-    @Autowired
-    private ReviewRepository reviewRepository;
-
-    @Autowired
     private BuildingRepository buildingRepository;
 
     @Autowired

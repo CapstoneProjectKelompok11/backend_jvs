@@ -208,6 +208,8 @@ class BuildingServiceTest {
         assertEquals(floorCount, result.get(0).getFloorCount());
     }
 
+
+
     @Test
     void getAllBuilding_NoComplex_Test() {
         List<Building> buildingList = new ArrayList<>();
@@ -649,6 +651,56 @@ class BuildingServiceTest {
 
         ResponseEntity<Object> responseEntity = buildingService.deleteBuilding(1L);
 
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void searchBuilding_Success_Test() {
+        List<Building> buildingList = new ArrayList<>();
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        buildingList.add(building);
+        Set<String> type = Set.of("Tipe 1", "Tipe 2");
+        Double rating = 4.8;
+        int floorCount = 3;
+        BuildingRequest request = BuildingRequest.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+
+        when(buildingRepository.findAllByNameContainsIgnoreCase(anyString())).thenReturn(buildingList);
+        when(floorRepository.findDistinctTypeByBuildingId(anyLong())).thenReturn(type);
+        when(reviewRepository.averageOfBuildingReviewRating(anyLong())).thenReturn(rating);
+        when(modelMapper.map(any(), eq(BuildingRequest.class))).thenReturn(request);
+        when(floorRepository.countByBuilding_Id(anyLong())).thenReturn(floorCount);
+
+        ResponseEntity<Object> responseEntity = buildingService.searchBuilding("search-input");
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Gedung A", result.get(0).getName());
+        assertEquals("Jalan A", result.get(0).getAddress());
+        assertEquals(100, result.get(0).getCapacity());
+        assertEquals(rating, result.get(0).getRating());
+        assertEquals(type, result.get(0).getOfficeType());
+        assertEquals(floorCount, result.get(0).getFloorCount());
+    }
+
+    @Test
+    void searchBuilding_Error_Test() {
+        when(buildingRepository.findAllByNameContainsIgnoreCase(anyString())).thenThrow(NullPointerException.class);
+
+        ResponseEntity<Object> responseEntity = buildingService.searchBuilding("search-input");
+        ApiResponse apiResponse = ((ApiResponse) responseEntity.getBody());
+
+        List<BuildingRequest> result = ((List<BuildingRequest>) apiResponse.getData());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
