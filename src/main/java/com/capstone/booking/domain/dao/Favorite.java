@@ -19,7 +19,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Entity
 @Table(name = "T_FAVORITE")
-@SQLDelete(sql = "UPDATE T_FAVORITE SET is_deleted = true WHERE user_id = ? and building_id = ?")
+@SQLDelete(sql = "UPDATE T_FAVORITE SET is_deleted = true WHERE building_id = ? and user_id = ?")
 @Where(clause = "is_deleted = false")
 @IdClass(Favorite.FavoriteId.class)
 public class Favorite extends BaseDAO {
