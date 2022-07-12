@@ -198,6 +198,19 @@ class ReservationServiceTest {
     }
 
     @Test
+    void getImage_Success_Test() {
+        byte[] bytes = "think of this as image data".getBytes();
+        ResponseEntity response = ResponseEntity.ok(bytes);
+        try (MockedStatic<FileUtil> utilities = Mockito.mockStatic(FileUtil.class)) {
+            utilities.when(() -> FileUtil.getFileContent(anyString(), anyString())).thenReturn(response);
+
+            ResponseEntity<Object> responseEntity = reservationService.getImage("filename.ext");
+
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        }
+
+    }
+    @Test
     void addPayment_Success_Test() throws IOException {
         User user = User.builder()
                 .id(1L)
@@ -270,6 +283,8 @@ class ReservationServiceTest {
         }
     }
 
+
+
     @Test
     void addPayment_UserEmpty_Test() throws IOException {
         MockMultipartFile file = new MockMultipartFile(
@@ -303,6 +318,31 @@ class ReservationServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
+
+    @Test
+    void addPayment_NotApproved_Test() throws IOException {
+        User user = User.builder()
+                .id(1L)
+                .email("some_email@email")
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .user(user)
+                .status(AppConstant.ReservationStatus.PENDING)
+                .build();
+        MockMultipartFile file = new MockMultipartFile(
+                "name",
+                "some_original_filename",
+                MediaType.TEXT_PLAIN_VALUE,
+                "think of this as image".getBytes());
+
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+        when(reservationRepository.findById(anyLong())).thenReturn(Optional.of(reservation));
+        ResponseEntity<Object> responseEntity = reservationService.addPayment(1L, file, "email");
+
+        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
 
     @Test
     void addPayment_Error_Test() throws IOException {

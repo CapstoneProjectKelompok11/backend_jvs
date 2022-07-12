@@ -187,7 +187,19 @@ class FloorServiceTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
+    @Test
+    void getImage_Success_Test() {
+        byte[] bytes = "think of this as image data".getBytes();
+        ResponseEntity response = ResponseEntity.ok(bytes);
+        try (MockedStatic<FileUtil> utilities = Mockito.mockStatic(FileUtil.class)) {
+            utilities.when(() -> FileUtil.getFileContent(anyString(), anyString())).thenReturn(response);
 
+            ResponseEntity<Object> responseEntity = floorService.getImage("filename.ext");
+
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        }
+
+    }
     @Test
     void addImageToFloor_Success_Test() throws IOException {
         Floor floor = Floor.builder()
