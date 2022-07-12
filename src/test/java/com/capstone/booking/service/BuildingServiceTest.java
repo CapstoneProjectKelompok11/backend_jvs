@@ -555,6 +555,20 @@ class BuildingServiceTest {
     }
 
     @Test
+    void getImage_Success_Test() {
+        byte[] bytes = "think of this as image data".getBytes();
+        ResponseEntity response = ResponseEntity.ok(bytes);
+        try (MockedStatic<FileUtil> utilities = Mockito.mockStatic(FileUtil.class)) {
+            utilities.when(() -> FileUtil.getFileContent(anyString(), anyString())).thenReturn(response);
+
+            ResponseEntity<Object> responseEntity = buildingService.getImage("filename.ext");
+
+            assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        }
+
+    }
+
+    @Test
     void updateBuilding_Success_Test() {
         Building building = Building.builder()
                 .id(1L)
