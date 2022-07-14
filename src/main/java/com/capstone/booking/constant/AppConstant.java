@@ -16,7 +16,7 @@ public class AppConstant {
         SUCCESS("SUCCESS", "Success!"),
         DATA_NOT_FOUND("DATA_NOT_FOUND", "Data not found!"),
         UNKNOWN_ERROR("UNKNOWN_ERROR", "Happened unknown error!"),
-
+        DATA_ALREADY_EXIST("DATA_ALREADY_EXIST", "The Data already exist in database"),
         NOT_LOGGED_IN("NOT_LOGGED_IN", "Login first to access this endpoint"),
         UNAUTHORIZED_ACCESS("UNAUTHORIZED_ACCESS", "You do not have permission to access this"),
 

@@ -130,10 +130,9 @@ class FavoriteServiceTest {
                 .build();
 
         when(favoriteRepository.findFavorite(anyString(), anyLong())).thenReturn(Optional.of(favorite));
-        doNothing().when(favoriteRepository).delete(any());
+        when(favoriteRepository.save(any())).thenReturn(favorite);
 
         ResponseEntity<Object> responseEntity = favoriteService.unFavorite("user-email@gmail.com", 1L);
-        verify(favoriteRepository, times(1)).delete(any());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -172,8 +171,62 @@ class FavoriteServiceTest {
                 .user(user)
                 .build();
 
+        when(favoriteRepository.findFavorite(anyString(), anyLong())).thenReturn(Optional.empty());
         when(buildingRepository.findById(anyLong())).thenReturn(Optional.of(building));
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
+        when(favoriteRepository.save(any())).thenReturn(favorite);
+
+        ResponseEntity<Object> responseEntity = favoriteService.addToFavorites("user-email@gmail.com", 1L);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+    }
+
+    @Test
+    void addToFavorites_ExistAndTrue_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        Favorite favorite = Favorite.builder()
+                .building(building)
+                .user(user)
+                .isFavorite(true)
+                .build();
+
+        when(favoriteRepository.findFavorite(anyString(), anyLong())).thenReturn(Optional.of(favorite));
+
+        ResponseEntity<Object> responseEntity = favoriteService.addToFavorites("user-email@gmail.com", 1L);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+    }
+
+    @Test
+    void addToFavorites_ExistAndFalse_Test() {
+        Building building = Building.builder()
+                .id(1L)
+                .name("Gedung A")
+                .address("Jalan A")
+                .capacity(100)
+                .build();
+        User user = User.builder()
+                .id(1L)
+                .email("some-email@gmail.com")
+                .build();
+        Favorite favorite = Favorite.builder()
+                .building(building)
+                .user(user)
+                .isFavorite(false)
+                .build();
+
+        when(favoriteRepository.findFavorite(anyString(), anyLong())).thenReturn(Optional.of(favorite));
         when(favoriteRepository.save(any())).thenReturn(favorite);
 
         ResponseEntity<Object> responseEntity = favoriteService.addToFavorites("user-email@gmail.com", 1L);
