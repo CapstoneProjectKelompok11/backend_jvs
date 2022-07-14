@@ -41,6 +41,7 @@ public class FavoriteService {
     public ResponseEntity<Object> getFavorite(String email) {
         log.info("Executing get favorites");
         try {
+
             List<Favorite> favorites = favoriteRepository.findFavoriteByUserEmailAndBuildingIsDeletedFalse(email);
             List<FavoriteResponse> responses = new ArrayList<>();
             for (Favorite favorite :
@@ -72,7 +73,9 @@ public class FavoriteService {
                         null,
                         HttpStatus.BAD_REQUEST);
             }
-            favoriteRepository.delete(favoriteOptional.get());
+            Favorite favorite = favoriteOptional.get();
+            favorite.setFavorite(false);
+            favoriteRepository.save(favorite);
             return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, null, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error occurred while trying to unFavorites. Error: {}", e.getMessage());
@@ -82,6 +85,19 @@ public class FavoriteService {
 
     public ResponseEntity<Object> addToFavorites(String email, Long buildingId) {
         try {
+            Optional<Favorite> favoriteOptional = favoriteRepository.findFavorite(email, buildingId);
+            if(favoriteOptional.isPresent()){
+                if(favoriteOptional.get().isFavorite()){
+                    log.info("Already Favored");
+                    return ResponseUtil.build(AppConstant.ResponseCode.DATA_ALREADY_EXIST, null, HttpStatus.BAD_REQUEST);
+                } else {
+                    Favorite favorite = favoriteOptional.get();
+                    favorite.setFavorite(true);
+                    favoriteRepository.save(favorite);
+                    return ResponseUtil.build(AppConstant.ResponseCode.SUCCESS, null, HttpStatus.OK);
+                }
+            }
+
             Optional<Building> buildingOptional = buildingRepository.findById(buildingId);
             if(buildingOptional.isEmpty()) {
                 log.info("Building with ID [{}] not found ", buildingId);
@@ -98,9 +114,11 @@ public class FavoriteService {
                         HttpStatus.BAD_REQUEST);
             }
 
+
             Favorite favorite = Favorite.builder()
                     .user(userOptional.get())
                     .building(buildingOptional.get())
+                    .isFavorite(true)
                     .build();
 
             favoriteRepository.save(favorite);
