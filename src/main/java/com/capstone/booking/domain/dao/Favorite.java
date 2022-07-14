@@ -42,4 +42,6 @@ public class Favorite extends BaseDAO {
     @JoinColumn(name = "building_id")
     private Building building;
 
+    private boolean isFavorite;
+
 }
